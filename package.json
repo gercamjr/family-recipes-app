@@ -1,0 +1,24 @@
+{
+  "name": "family-recipes-app",
+  "version": "1.0.0",
+  "description": "Secure, invite-only web app for family recipes with role-based access and bilingual support",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "install-all": "npm install",
+    "build": "npm run build --workspaces",
+    "test": "npm test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "dev": "npm run dev --workspaces"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
