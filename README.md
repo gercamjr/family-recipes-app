@@ -45,6 +45,7 @@ family-recipes-app/
 
 3. **Configure environment variables**:
    - Copy `backend/.env.example` to `backend/.env`
+   - Copy `frontend/.env.example` to `frontend/.env`
    - Fill in your database URL, JWT secret, Cloudinary credentials, and email settings
 
 4. **Set up the database**:
