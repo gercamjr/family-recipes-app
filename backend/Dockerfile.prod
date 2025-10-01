@@ -1,0 +1,40 @@
+# Backend Production Dockerfile
+FROM node:20-alpine AS base
+
+# Install dependencies
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Production stage
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Remove development files
+RUN rm -rf tests .git
+
+USER nextjs
+
+EXPOSE 5001
+
+ENV PORT 5001
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["npm", "start"]

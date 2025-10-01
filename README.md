@@ -24,6 +24,7 @@ A secure, invite-only web app for family recipes with role-based access control,
 family-recipes-app/
 ├── frontend/          # React PWA frontend
 ├── backend/           # Node.js/Express API
+├── docker/            # Docker development environment ([docs](docker/README.md))
 ├── docs/              # Documentation and plans
 └── package.json       # Monorepo configuration
 ```
@@ -61,6 +62,16 @@ family-recipes-app/
    # Frontend
    npm run dev --workspace=frontend
    ```
+
+### Alternative: Docker Development Environment
+
+For a complete containerized development environment with PostgreSQL, see the [Docker documentation](docker/README.md).
+
+Quick Docker setup:
+
+```bash
+npm run docker:up
+```
 
 ## Development Phases
 

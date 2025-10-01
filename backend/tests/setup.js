@@ -1,9 +1,13 @@
 const { Sequelize } = require('sequelize')
 
-// Create test database
+// Create test database connection
 const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: ':memory:',
+  dialect: 'postgres',
+  host: process.env.POSTGRES_HOST || 'postgres',
+  port: process.env.POSTGRES_PORT || 5432,
+  database: process.env.POSTGRES_DB || 'family_recipes_db',
+  username: process.env.POSTGRES_USER || 'family_recipes_user',
+  password: process.env.POSTGRES_PASSWORD || 'Family!$042288',
   logging: false,
 })
 
@@ -60,6 +64,7 @@ const User = sequelize.define(
   },
   {
     tableName: 'users',
+    timestamps: true,
   }
 )
 
@@ -166,6 +171,7 @@ const Recipe = sequelize.define(
   },
   {
     tableName: 'recipes',
+    timestamps: true,
   }
 )
 
@@ -200,6 +206,8 @@ Recipe.addScope('userRecipes', (userId) => ({
 
 // Global test setup
 beforeAll(async () => {
+  // Drop all tables to ensure clean state
+  await sequelize.drop()
   await sequelize.sync({ force: true })
 })
 

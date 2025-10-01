@@ -1,0 +1,19 @@
+# Override file for development environment
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  backend:
+    environment:
+      # Override with local environment variables if .env file exists
+      NODE_ENV: development
+    volumes:
+      # Mount .env file if it exists
+      - ./backend/.env:/app/backend/.env:ro
+
+  frontend:
+    environment:
+      # Override with local environment variables if .env file exists
+      NODE_ENV: development
+    volumes:
+      # Mount .env file if it exists
+      - ./frontend/.env:/app/frontend/.env:ro

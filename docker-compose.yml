@@ -1,0 +1,70 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: family-recipes-postgres
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - family-recipes-network
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U family_recipes_user -d family_recipes_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: family-recipes-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override DATABASE_URL to use the postgres service hostname in Docker
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - family-recipes-network
+    command: npm run dev
+
+  # Frontend Development Server
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: family-recipes-frontend
+    env_file:
+      - ./frontend/.env
+    environment:
+      # Override API URL to use the backend service hostname in Docker
+      VITE_API_BASE_URL: http://backend:5001/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    networks:
+      - family-recipes-network
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres_data:
+
+networks:
+  family-recipes-network:
+    driver: bridge

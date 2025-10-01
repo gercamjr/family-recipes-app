@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "postgres": true,
   "builds": [
     {
       "src": "backend/server.js",
