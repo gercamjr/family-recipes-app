@@ -52,6 +52,7 @@ const optionalAuth = async (req, res, next) => {
       }
     } catch (error) {
       // Invalid token, but don't fail - just continue without user
+      console.error('Optional auth JWT verification error:', error)
     }
   }
 
