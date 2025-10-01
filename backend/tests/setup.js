@@ -72,6 +72,132 @@ User.prototype.toJSON = function () {
   return values
 }
 
+const Recipe = sequelize.define(
+  'Recipe',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    titleEn: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    titleEs: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    ingredientsEn: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      validate: {
+        isArray(value) {
+          if (!Array.isArray(value)) {
+            throw new Error('Ingredients must be an array')
+          }
+        },
+      },
+    },
+    ingredientsEs: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      validate: {
+        isArray(value) {
+          if (value && !Array.isArray(value)) {
+            throw new Error('Ingredients must be an array')
+          }
+        },
+      },
+    },
+    instructionsEn: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    instructionsEs: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    prepTime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    cookTime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    servings: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    tags: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: '[]',
+      get() {
+        const rawValue = this.getDataValue('tags')
+        return rawValue ? JSON.parse(rawValue) : []
+      },
+      set(val) {
+        this.setDataValue('tags', JSON.stringify(val || []))
+      },
+    },
+    categories: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: '[]',
+      get() {
+        const rawValue = this.getDataValue('categories')
+        return rawValue ? JSON.parse(rawValue) : []
+      },
+      set(val) {
+        this.setDataValue('categories', JSON.stringify(val || []))
+      },
+    },
+    isPublic: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+  },
+  {
+    tableName: 'recipes',
+  }
+)
+
+// Add scopes
+Recipe.addScope('search', (query, language = 'en') => {
+  const whereClause = {}
+
+  if (query) {
+    const searchFields =
+      language === 'es'
+        ? ['titleEs', 'ingredientsEs', 'instructionsEs', 'tags', 'categories']
+        : ['titleEn', 'ingredientsEn', 'instructionsEn', 'tags', 'categories']
+
+    whereClause[sequelize.Sequelize.Op.or] = searchFields.map((field) => ({
+      [field]: {
+        [sequelize.Sequelize.Op.iLike]: `%${query}%`,
+      },
+    }))
+  }
+
+  return {
+    where: {
+      ...whereClause,
+      isPublic: true,
+    },
+  }
+})
+
+Recipe.addScope('userRecipes', (userId) => ({
+  where: { userId },
+}))
+
 // Global test setup
 beforeAll(async () => {
   await sequelize.sync({ force: true })
@@ -84,3 +210,4 @@ afterAll(async () => {
 // Make sequelize and models available globally for tests
 global.sequelize = sequelize
 global.User = User
+global.Recipe = Recipe
