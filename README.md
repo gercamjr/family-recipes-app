@@ -86,10 +86,30 @@ See `docs/software-development-plan.md` for detailed roadmap.
 
 ## Contributing
 
-1. Create a feature branch from `main`
-2. Make your changes
-3. Run tests: `npm test`
-4. Submit a pull request
+This project uses branch protection rules to ensure code quality. All changes to the `main` branch must be made through pull requests that pass automated tests.
+
+### Workflow
+
+1. Create a feature branch from `main`:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+2. Make your changes and commit them
+3. Run tests locally: `npm test`
+4. Push your branch: `git push origin feature/your-feature-name`
+5. Create a pull request on GitHub
+6. Wait for CI/CD checks to pass (tests and build)
+7. Request review from team members
+8. Once approved and all checks pass, merge the PR
+
+### Branch Protection
+
+The `main` branch is protected and requires:
+- ✅ All CI/CD checks to pass
+- ✅ Code review approval
+- ✅ Pull request workflow (no direct pushes)
+
+For detailed information about branch protection setup and workflow, see [Branch Protection Guide](.github/BRANCH_PROTECTION.md).
 
 ## License
 
