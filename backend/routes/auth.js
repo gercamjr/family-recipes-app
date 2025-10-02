@@ -1,11 +1,9 @@
 const express = require('express')
 const { body, validationResult } = require('express-validator')
-const { PrismaClient } = require('@prisma/client')
 const { authenticateToken, requireRole } = require('../middleware/auth')
 const { hashPassword, verifyPassword, generateToken, generateInviteToken } = require('../utils/auth')
 const nodemailer = require('nodemailer')
-
-const prisma = new PrismaClient()
+const prisma = require('../lib/prisma')
 const router = express.Router()
 
 // Email transporter
@@ -37,7 +35,7 @@ router.post('/register', validateRegistration, async (req, res) => {
       return res.status(400).json({ errors: errors.array() })
     }
 
-    const { email, password, inviteToken, languagePref = 'en' } = req.body
+    const { email, password, name, inviteToken, languagePref = 'en' } = req.body
 
     // Find user with valid invite token
     const inviter = await prisma.user.findFirst({
@@ -66,6 +64,7 @@ router.post('/register', validateRegistration, async (req, res) => {
     const user = await prisma.user.create({
       data: {
         email,
+        name,
         passwordHash,
         role: 'viewer', // Default role
         invitedById: inviter.id,
@@ -91,6 +90,7 @@ router.post('/register', validateRegistration, async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
+        name: user.name,
         role: user.role,
         languagePref: user.languagePref,
       },
