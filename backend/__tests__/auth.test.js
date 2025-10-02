@@ -1,12 +1,31 @@
 const request = require('supertest')
 const app = require('../server')
-const { prismaMock } = require('../singleton')
 const { verifyPassword } = require('../utils/auth')
 const jwt = require('jsonwebtoken')
+
+jest.mock('../lib/prisma', () => ({
+  user: {
+    findFirst: jest.fn(),
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+  },
+  recipe: {
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+  },
+}))
+const prisma = require('../lib/prisma')
 
 jest.mock('../utils/auth', () => ({
   ...jest.requireActual('../utils/auth'),
   verifyPassword: jest.fn(),
+  hashPassword: jest.fn(() => 'hashed-password'),
+  generateToken: jest.fn(() => 'fake-token'),
 }))
 
 jest.mock('jsonwebtoken', () => ({
@@ -39,13 +58,13 @@ describe('Auth Routes', () => {
 
       // Mock the database calls
       // 1. Find the inviter by token
-      prismaMock.user.findFirst.mockResolvedValueOnce(inviter)
+      prisma.user.findFirst.mockResolvedValueOnce(inviter)
       // 2. Check if new user's email already exists
-      prismaMock.user.findFirst.mockResolvedValueOnce(null)
+      prisma.user.findFirst.mockResolvedValueOnce(null)
       // 3. Create the new user
-      prismaMock.user.create.mockResolvedValue(newUser)
+      prisma.user.create.mockResolvedValue(newUser)
       // 4. Update the inviter's token
-      prismaMock.user.update.mockResolvedValue(inviter)
+      prisma.user.update.mockResolvedValue(inviter)
 
       const res = await request(app).post('/api/auth/register').send({
         email: newUser.email,
@@ -68,7 +87,7 @@ describe('Auth Routes', () => {
       const inviteToken = 'invalid-invite-token'
 
       // Mock the database to find no user with the given token
-      prismaMock.user.findFirst.mockResolvedValue(null)
+      prisma.user.findFirst.mockResolvedValue(null)
 
       const res = await request(app).post('/api/auth/register').send({
         email: 'test@example.com',
@@ -98,9 +117,9 @@ describe('Auth Routes', () => {
       }
 
       // 1. Find the inviter by token
-      prismaMock.user.findFirst.mockResolvedValueOnce(inviter)
+      prisma.user.findFirst.mockResolvedValueOnce(inviter)
       // 2. Find the existing user by email
-      prismaMock.user.findUnique.mockResolvedValueOnce(existingUser)
+      prisma.user.findUnique.mockResolvedValueOnce(existingUser)
 
       const res = await request(app).post('/api/auth/register').send({
         email: existingUser.email,
@@ -126,7 +145,7 @@ describe('Auth Routes', () => {
       }
 
       // Mock findFirst to return the user
-      prismaMock.user.findFirst.mockResolvedValue(user)
+      prisma.user.findFirst.mockResolvedValue(user)
       // Mock password verification to succeed
       verifyPassword.mockResolvedValue(true)
 
@@ -150,7 +169,7 @@ describe('Auth Routes', () => {
 
     it('should return 401 for a non-existent user', async () => {
       // Mock findFirst to return null
-      prismaMock.user.findFirst.mockResolvedValue(null)
+      prisma.user.findFirst.mockResolvedValue(null)
 
       const res = await request(app).post('/api/auth/login').send({
         email: 'nouser@example.com',
@@ -170,7 +189,7 @@ describe('Auth Routes', () => {
       }
 
       // Mock findFirst to return the user
-      prismaMock.user.findFirst.mockResolvedValue(user)
+      prisma.user.findFirst.mockResolvedValue(user)
       // Mock password verification to fail
       verifyPassword.mockResolvedValue(false)
 
@@ -186,7 +205,7 @@ describe('Auth Routes', () => {
 
     it('should return 401 for an inactive user', async () => {
       // The route logic looks for `isActive: true`, so an inactive user will not be found.
-      prismaMock.user.findFirst.mockResolvedValue(null)
+      prisma.user.findFirst.mockResolvedValue(null)
 
       const res = await request(app).post('/api/auth/login').send({
         email: 'inactive@example.com',
@@ -214,7 +233,7 @@ describe('Auth Routes', () => {
       jwt.verify.mockReturnValue({ id: user.id })
 
       // Mock prisma to find the full user object
-      prismaMock.user.findUnique.mockResolvedValue(user)
+      prisma.user.findUnique.mockResolvedValue(user)
 
       const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`)
 
