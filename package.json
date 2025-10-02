@@ -22,7 +22,7 @@
     "docker:logs-backend": "docker compose logs -f backend",
     "docker:logs-frontend": "docker compose logs -f frontend",
     "docker:logs-db": "docker compose logs -f postgres",
-    "docker:db-connect": "docker compose exec postgres psql -U postgres -d family_recipes_dev",
+    "docker:db-connect": "docker compose exec postgres psql -U family_recipes_user -d family_recipes_db",
     "docker:db-reset": "docker compose down -v && docker compose up -d postgres && echo 'Waiting for database to be ready...' && sleep 10 && docker compose up -d backend",
     "docker:test": "docker compose exec backend npm test",
     "docker:test-watch": "docker compose exec backend npm run test:watch",
@@ -32,7 +32,7 @@
     "docker:shell-frontend": "docker compose exec frontend sh",
     "docker:shell-db": "docker compose exec postgres bash",
     "docker:install": "docker compose run --rm backend npm ci && docker compose run --rm frontend npm ci",
-    "docker:health": "echo 'Checking service health...' && docker compose ps && echo '' && echo 'PostgreSQL health check:' && docker compose exec postgres pg_isready -U postgres -d family_recipes_dev || echo 'PostgreSQL not ready' && echo '' && echo 'Backend health check:' && curl -s http://localhost:5001/api/health || echo 'Backend not responding' && echo '' && echo 'Frontend health check:' && curl -s http://localhost:5173 || echo 'Frontend not responding'"
+    "docker:health": "echo 'Checking service health...' && docker compose ps && echo '' && echo 'PostgreSQL health check:' && docker compose exec postgres pg_isready -U family_recipes_user -d family_recipes_db || echo 'PostgreSQL not ready' && echo '' && echo 'Backend health check:' && curl -s http://localhost:5001/api/health || echo 'Backend not responding' && echo '' && echo 'Frontend health check:' && curl -s http://localhost:5173 || echo 'Frontend not responding'"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
