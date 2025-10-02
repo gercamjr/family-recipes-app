@@ -6,10 +6,6 @@ require('dotenv').config()
 
 const app = express()
 
-// Import database and models
-const { sequelize, testConnection } = require('./config/database')
-const models = require('./models')
-
 // Security middleware
 app.use(helmet())
 app.use(
@@ -63,22 +59,10 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5001
 
 if (require.main === module) {
-  // Test database connection and sync models
-  testConnection()
-    .then(() => {
-      return sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
-    })
-    .then(() => {
-      console.log('Database synchronized successfully.')
-      app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`)
-        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
-      })
-    })
-    .catch((error) => {
-      console.error('Failed to start server:', error)
-      process.exit(1)
-    })
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
+  })
 }
 
 module.exports = app

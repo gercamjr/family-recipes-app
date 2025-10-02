@@ -1,9 +1,10 @@
 const express = require('express')
 const { body, validationResult, query } = require('express-validator')
-const { Recipe, User, Comment, Favorite, Media } = require('../models')
+const { PrismaClient } = require('@prisma/client')
 const { authenticateToken, requireRole, optionalAuth } = require('../middleware/auth')
 const { formatRecipeResponse } = require('../utils/auth')
 
+const prisma = new PrismaClient()
 const router = express.Router()
 
 // Validation middleware
@@ -40,64 +41,45 @@ router.get(
     try {
       const { search, category, tag, language = req.user?.languagePref || 'en', page = 1, limit = 20 } = req.query
 
-      const offset = (page - 1) * limit
+      const skip = (page - 1) * limit
       const whereClause = { isPublic: true }
 
       // Add search conditions
       if (search) {
-        const searchFields =
-          language === 'es'
-            ? ['titleEs', 'ingredientsEs', 'instructionsEs']
-            : ['titleEn', 'ingredientsEn', 'instructionsEn']
+        const searchFields = language === 'es' ? ['titleEs', 'instructionsEs'] : ['titleEn', 'instructionsEn']
 
-        whereClause[require('sequelize').Op.or] = searchFields.map((field) => ({
+        whereClause.OR = searchFields.map((field) => ({
           [field]: {
-            [require('sequelize').Op.iLike]: `%${search}%`,
+            contains: search,
+            mode: 'insensitive',
           },
         }))
       }
 
       if (category) {
-        whereClause.categories = {
-          [require('sequelize').Op.contains]: [category],
-        }
+        whereClause.categories = { has: category }
       }
 
       if (tag) {
-        whereClause.tags = {
-          [require('sequelize').Op.contains]: [tag],
-        }
+        whereClause.tags = { has: tag }
       }
 
-      const { count, rows: recipes } = await Recipe.findAndCountAll({
+      const recipes = await prisma.recipe.findMany({
         where: whereClause,
-        include: [
-          {
-            model: User,
-            as: 'author',
-            attributes: ['id', 'email'],
+        include: {
+          author: {
+            select: { id: true, email: true },
           },
-          {
-            model: Media,
-            as: 'media',
-            order: [['order', 'ASC']],
+          _count: {
+            select: { comments: true, favorites: true },
           },
-          {
-            model: Comment,
-            as: 'comments',
-            attributes: ['id'],
-          },
-          {
-            model: Favorite,
-            as: 'favorites',
-            attributes: ['id'],
-          },
-        ],
-        order: [['createdAt', 'DESC']],
-        limit,
-        offset,
-        distinct: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: parseInt(limit),
+        skip: skip,
       })
+
+      const totalRecipes = await prisma.recipe.count({ where: whereClause })
 
       const formattedRecipes = recipes.map((recipe) => formatRecipeResponse(recipe, language))
 
@@ -106,8 +88,8 @@ router.get(
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
-          total: count,
-          pages: Math.ceil(count / limit),
+          total: totalRecipes,
+          pages: Math.ceil(totalRecipes / limit),
         },
       })
     } catch (error) {
@@ -122,26 +104,14 @@ router.get(
 // @access  Private
 router.get('/my', authenticateToken, async (req, res) => {
   try {
-    const recipes = await Recipe.findAll({
-      where: { userId: req.user.id },
-      include: [
-        {
-          model: Media,
-          as: 'media',
-          order: [['order', 'ASC']],
+    const recipes = await prisma.recipe.findMany({
+      where: { authorId: req.user.id },
+      include: {
+        _count: {
+          select: { comments: true, favorites: true },
         },
-        {
-          model: Comment,
-          as: 'comments',
-          attributes: ['id'],
-        },
-        {
-          model: Favorite,
-          as: 'favorites',
-          attributes: ['id'],
-        },
-      ],
-      order: [['createdAt', 'DESC']],
+      },
+      orderBy: { createdAt: 'desc' },
     })
 
     const formattedRecipes = recipes.map((recipe) => formatRecipeResponse(recipe, req.user.languagePref))
@@ -158,36 +128,24 @@ router.get('/my', authenticateToken, async (req, res) => {
 // @access  Public (for public recipes) or Private (for own recipes)
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
-    const recipe = await Recipe.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          as: 'author',
-          attributes: ['id', 'email'],
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: parseInt(req.params.id) },
+      include: {
+        author: {
+          select: { id: true, email: true },
         },
-        {
-          model: Media,
-          as: 'media',
-          order: [['order', 'ASC']],
-        },
-        {
-          model: Comment,
-          as: 'comments',
-          include: [
-            {
-              model: User,
-              as: 'author',
-              attributes: ['id', 'email'],
+        comments: {
+          include: {
+            author: {
+              select: { id: true, email: true },
             },
-          ],
-          order: [['createdAt', 'ASC']],
+          },
+          orderBy: { createdAt: 'asc' },
         },
-        {
-          model: Favorite,
-          as: 'favorites',
-          attributes: ['id'],
+        _count: {
+          select: { favorites: true },
         },
-      ],
+      },
     })
 
     if (!recipe) {
@@ -195,7 +153,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
 
     // Check permissions
-    if (!recipe.isPublic && (!req.user || req.user.id !== recipe.userId)) {
+    if (!recipe.isPublic && (!req.user || req.user.id !== recipe.authorId)) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
@@ -219,29 +177,26 @@ router.post('/', authenticateToken, validateRecipe, async (req, res) => {
       return res.status(400).json({ errors: errors.array() })
     }
 
+    const { titleEn, ingredientsEn, instructionsEn, ...rest } = req.body
+
     const recipeData = {
-      ...req.body,
-      userId: req.user.id,
+      titleEn,
+      ingredientsEn,
+      instructionsEn,
+      ...rest,
+      authorId: req.user.id,
     }
 
-    const recipe = await Recipe.create(recipeData)
-
-    // Fetch with associations for response
-    const createdRecipe = await Recipe.findByPk(recipe.id, {
-      include: [
-        {
-          model: User,
-          as: 'author',
-          attributes: ['id', 'email'],
+    const recipe = await prisma.recipe.create({
+      data: recipeData,
+      include: {
+        author: {
+          select: { id: true, email: true },
         },
-        {
-          model: Media,
-          as: 'media',
-        },
-      ],
+      },
     })
 
-    const formattedRecipe = formatRecipeResponse(createdRecipe, req.user.languagePref)
+    const formattedRecipe = formatRecipeResponse(recipe, req.user.languagePref)
 
     res.status(201).json({
       message: 'Recipe created successfully',
@@ -263,33 +218,27 @@ router.put('/:id', authenticateToken, validateRecipe, async (req, res) => {
       return res.status(400).json({ errors: errors.array() })
     }
 
-    const recipe = await Recipe.findByPk(req.params.id)
+    const recipeId = parseInt(req.params.id)
+    const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } })
     if (!recipe) {
       return res.status(404).json({ error: 'Recipe not found' })
     }
 
     // Check permissions
-    const canEdit = req.user.role === 'admin' || req.user.role === 'editor' || req.user.id === recipe.userId
+    const canEdit = req.user.role === 'admin' || req.user.role === 'editor' || req.user.id === recipe.authorId
 
     if (!canEdit) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
-    await recipe.update(req.body)
-
-    // Fetch updated recipe with associations
-    const updatedRecipe = await Recipe.findByPk(recipe.id, {
-      include: [
-        {
-          model: User,
-          as: 'author',
-          attributes: ['id', 'email'],
+    const updatedRecipe = await prisma.recipe.update({
+      where: { id: recipeId },
+      data: req.body,
+      include: {
+        author: {
+          select: { id: true, email: true },
         },
-        {
-          model: Media,
-          as: 'media',
-        },
-      ],
+      },
     })
 
     const formattedRecipe = formatRecipeResponse(updatedRecipe, req.user.languagePref)
@@ -309,18 +258,19 @@ router.put('/:id', authenticateToken, validateRecipe, async (req, res) => {
 // @access  Private (owner or admin)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
-    const recipe = await Recipe.findByPk(req.params.id)
+    const recipeId = parseInt(req.params.id)
+    const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } })
     if (!recipe) {
       return res.status(404).json({ error: 'Recipe not found' })
     }
 
     // Check permissions
-    const canDelete = req.user.role === 'admin' || req.user.id === recipe.userId
+    const canDelete = req.user.role === 'admin' || req.user.id === recipe.authorId
     if (!canDelete) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
-    await recipe.destroy()
+    await prisma.recipe.delete({ where: { id: recipeId } })
 
     res.json({ message: 'Recipe deleted successfully' })
   } catch (error) {

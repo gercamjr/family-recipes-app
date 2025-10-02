@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Recipe {
+  id             Int      @id @default(autoincrement())
+  titleEn        String   @map("titleEn") @db.VarChar(255)
+  titleEs        String?  @map("titleEs") @db.VarChar(255)
+  ingredientsEn  Json     @map("ingredientsEn") @db.Json
+  ingredientsEs  Json?    @map("ingredientsEs") @db.Json
+  instructionsEn String   @map("instructionsEn")
+  instructionsEs String?  @map("instructionsEs")
+  prepTime       Int?
+  cookTime       Int?
+  servings       Int?
+  tags           String[] @default([])
+  categories     String[] @default([])
+  isPublic       Boolean  @default(true) @map("isPublic")
+  createdAt      DateTime @map("createdAt") @db.Timestamptz(6)
+  updatedAt      DateTime @map("updatedAt") @db.Timestamptz(6)
+
+  author   User @relation("UserRecipes", fields: [authorId], references: [id])
+  authorId Int  @map("userId")
+
+  @@map("recipes")
+}
+
+model User {
+  id                 Int          @id @default(autoincrement())
+  email              String       @unique @db.VarChar(255)
+  passwordHash       String       @map("passwordHash") @db.VarChar(255)
+  role               Role         @default(viewer)
+  languagePref       LanguagePref @default(en) @map("languagePref")
+  isActive           Boolean      @default(true) @map("isActive")
+  inviteToken        String?      @map("inviteToken") @db.VarChar(255)
+  inviteTokenExpires DateTime?    @map("inviteTokenExpires") @db.Timestamptz(6)
+  createdAt          DateTime     @map("createdAt") @db.Timestamptz(6)
+  updatedAt          DateTime     @map("updatedAt") @db.Timestamptz(6)
+
+  recipes         Recipe[]       @relation("UserRecipes")
+  
+  invitedBy   User?  @relation("Invitations", fields: [invitedById], references: [id])
+  invitedById Int?   @map("invitedBy")
+  invites     User[] @relation("Invitations")
+
+  @@map("users")
+}
+
+enum LanguagePref {
+  en
+  es
+  @@map("enum_users_languagePref")
+}
+
+enum Role {
+  admin
+  editor
+  viewer
+  @@map("enum_users_role")
+}

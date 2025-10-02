@@ -58,8 +58,8 @@ const formatRecipeResponse = (recipe, language = 'en') => {
         }
       : null,
     media: recipe.media || [],
-    commentsCount: recipe.comments ? recipe.comments.length : 0,
-    favoritesCount: recipe.favorites ? recipe.favorites.length : 0,
+    commentsCount: recipe._count ? recipe._count.comments : 0,
+    favoritesCount: recipe._count ? recipe._count.favorites : 0,
   }
 }
 

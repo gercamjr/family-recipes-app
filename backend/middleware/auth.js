@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -11,7 +12,7 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    const user = await User.findByPk(decoded.id)
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } })
 
     if (!user || !user.isActive) {
       return res.status(401).json({ error: 'Invalid or inactive user' })
@@ -46,7 +47,7 @@ const optionalAuth = async (req, res, next) => {
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
-      const user = await User.findByPk(decoded.id)
+      const user = await prisma.user.findUnique({ where: { id: decoded.id } })
       if (user && user.isActive) {
         req.user = user
       }

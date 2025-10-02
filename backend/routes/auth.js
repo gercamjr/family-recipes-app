@@ -1,10 +1,11 @@
 const express = require('express')
 const { body, validationResult } = require('express-validator')
-const { User } = require('../models')
+const { PrismaClient } = require('@prisma/client')
 const { authenticateToken, requireRole } = require('../middleware/auth')
 const { hashPassword, verifyPassword, generateToken, generateInviteToken } = require('../utils/auth')
 const nodemailer = require('nodemailer')
 
+const prisma = new PrismaClient()
 const router = express.Router()
 
 // Email transporter
@@ -39,11 +40,11 @@ router.post('/register', validateRegistration, async (req, res) => {
     const { email, password, inviteToken, languagePref = 'en' } = req.body
 
     // Find user with valid invite token
-    const inviter = await User.findOne({
+    const inviter = await prisma.user.findFirst({
       where: {
         inviteToken: inviteToken,
         inviteTokenExpires: {
-          [require('sequelize').Op.gt]: new Date(),
+          gt: new Date(),
         },
       },
     })
@@ -53,7 +54,7 @@ router.post('/register', validateRegistration, async (req, res) => {
     }
 
     // Check if email already exists
-    const existingUser = await User.findOne({ where: { email } })
+    const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
       return res.status(400).json({ error: 'Email already registered' })
     }
@@ -62,18 +63,23 @@ router.post('/register', validateRegistration, async (req, res) => {
     const passwordHash = await hashPassword(password)
 
     // Create user
-    const user = await User.create({
-      email,
-      passwordHash,
-      role: 'viewer', // Default role
-      invitedBy: inviter.id,
-      languagePref,
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: 'viewer', // Default role
+        invitedById: inviter.id,
+        languagePref,
+      },
     })
 
     // Clear the used invite token
-    await inviter.update({
-      inviteToken: null,
-      inviteTokenExpires: null,
+    await prisma.user.update({
+      where: { id: inviter.id },
+      data: {
+        inviteToken: null,
+        inviteTokenExpires: null,
+      },
     })
 
     // Generate JWT
@@ -108,7 +114,7 @@ router.post('/login', validateLogin, async (req, res) => {
     const { email, password } = req.body
 
     // Find user
-    const user = await User.findOne({ where: { email, isActive: true } })
+    const user = await prisma.user.findFirst({ where: { email, isActive: true } })
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' })
     }
@@ -154,28 +160,33 @@ router.post(
       }
 
       const { email } = req.body
+      const inviterId = req.user.id
 
       // Check if email already exists
-      const existingUser = await User.findOne({ where: { email } })
+      const existingUser = await prisma.user.findUnique({ where: { email } })
       if (existingUser) {
-        return res.status(400).json({ error: 'Email already registered' })
+        return res.status(400).json({ error: 'Email already registered or invited' })
       }
 
       // Generate invite token
       const inviteToken = generateInviteToken()
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-      // For now, just return the token (in production, send email)
+      // Store token in the inviter's record
+      await prisma.user.update({
+        where: { id: inviterId },
+        data: {
+          inviteToken,
+          inviteTokenExpires: expiresAt,
+        },
+      })
+
       // TODO: Send invitation email with token
 
-      // Store token temporarily (in a real app, you'd create a separate invites table)
-      // For MVP, we'll assume the admin will manually share the token
-
       res.json({
-        message: 'Invitation token generated',
+        message: 'Invitation token generated and assigned to you. Share it with the user.',
         inviteToken,
         expiresAt,
-        note: 'Share this token with the user to complete registration',
       })
     } catch (error) {
       console.error('Invite error:', error)
