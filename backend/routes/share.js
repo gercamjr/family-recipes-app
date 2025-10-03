@@ -62,7 +62,7 @@ router.post('/email/:recipeId', authenticateToken, validateEmailShare, async (re
     }
 
     const recipeId = parseInt(req.params.recipeId)
-    const { email, message = '' } = req.body
+    const { email } = req.body
 
     const recipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
