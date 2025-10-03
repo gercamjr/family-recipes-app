@@ -72,14 +72,14 @@ const Register = () => {
           <div className='rounded-md shadow-sm -space-y-px'>
             <div>
               <label htmlFor='name' className='sr-only'>
-                {t('register.fullName')}
+                {t('auth.register.name')}
               </label>
               <input
                 {...register('name', {
-                  required: t('register.nameRequired'),
+                  required: t('auth.register.nameRequired'),
                   minLength: {
                     value: 2,
-                    message: t('register.nameMinLength'),
+                    message: t('auth.register.nameRequired'),
                   },
                 })}
                 id='name'
@@ -88,21 +88,21 @@ const Register = () => {
                 autoComplete='name'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800'
-                placeholder={t('register.fullName')}
+                placeholder={t('auth.register.name')}
               />
               {errors.name && <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.name.message}</p>}
             </div>
 
             <div>
               <label htmlFor='email' className='sr-only'>
-                {t('register.emailAddress')}
+                {t('auth.register.email')}
               </label>
               <input
                 {...register('email', {
-                  required: t('register.emailRequired'),
+                  required: t('auth.register.emailRequired'),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: t('register.invalidEmail'),
+                    message: t('validation.email'),
                   },
                 })}
                 id='email'
@@ -111,25 +111,21 @@ const Register = () => {
                 autoComplete='email'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800'
-                placeholder={t('register.emailAddress')}
+                placeholder={t('auth.register.email')}
               />
               {errors.email && <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.email.message}</p>}
             </div>
 
             <div className='relative'>
               <label htmlFor='password' className='sr-only'>
-                {t('register.password')}
+                {t('auth.register.password')}
               </label>
               <input
                 {...register('password', {
-                  required: t('register.passwordRequired'),
+                  required: t('validation.required'),
                   minLength: {
-                    value: 8,
-                    message: t('register.passwordMinLength'),
-                  },
-                  pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                    message: t('register.passwordPattern'),
+                    value: 6,
+                    message: t('auth.register.passwordTooShort'),
                   },
                 })}
                 id='password'
@@ -138,7 +134,7 @@ const Register = () => {
                 autoComplete='new-password'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 pr-10'
-                placeholder={t('register.password')}
+                placeholder={t('auth.register.password')}
               />
               <button
                 type='button'
@@ -178,12 +174,12 @@ const Register = () => {
 
             <div className='relative'>
               <label htmlFor='confirmPassword' className='sr-only'>
-                {t('register.confirmPassword')}
+                {t('auth.register.confirmPassword')}
               </label>
               <input
                 {...register('confirmPassword', {
-                  required: t('register.confirmPasswordRequired'),
-                  validate: (value) => value === password || t('register.passwordsDoNotMatch'),
+                  required: t('validation.required'),
+                  validate: (value) => value === password || t('auth.register.passwordMismatch'),
                 })}
                 id='confirmPassword'
                 name='confirmPassword'
@@ -191,7 +187,7 @@ const Register = () => {
                 autoComplete='new-password'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 pr-10'
-                placeholder={t('register.confirmPassword')}
+                placeholder={t('auth.register.confirmPassword')}
               />
               <button
                 type='button'
@@ -234,9 +230,7 @@ const Register = () => {
             <div className='rounded-md bg-red-50 dark:bg-red-900/50 p-4'>
               <div className='flex'>
                 <div className='ml-3'>
-                  <h3 className='text-sm font-medium text-red-800 dark:text-red-200'>
-                    {t('register.registrationError')}
-                  </h3>
+                  <h3 className='text-sm font-medium text-red-800 dark:text-red-200'>{t('common.error')}</h3>
                   <div className='mt-2 text-sm text-red-700 dark:text-red-300'>
                     <p>{error}</p>
                   </div>
@@ -247,7 +241,7 @@ const Register = () => {
                         onClick={handleClearError}
                         className='bg-red-50 dark:bg-red-900/50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 dark:focus:ring-offset-red-900/50 focus:ring-red-600'
                       >
-                        {t('register.dismiss')}
+                        {t('common.close')}
                       </button>
                     </div>
                   </div>
@@ -284,26 +278,14 @@ const Register = () => {
                       d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                     ></path>
                   </svg>
-                  {t('register.creatingAccount')}
+                  {t('common.loading')}
                 </div>
               ) : (
-                t('register.createAccount')
+                t('auth.register.submit')
               )}
             </button>
           </div>
         </form>
-
-        <div className='text-center'>
-          <p className='text-sm text-gray-600 dark:text-gray-400'>
-            {t('register.alreadyHaveAccount')}{' '}
-            <Link
-              to='/login'
-              className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300'
-            >
-              {t('register.signInHere')}
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   )

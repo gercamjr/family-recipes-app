@@ -212,18 +212,6 @@ const Login = () => {
             <p className='text-sm text-gray-600 dark:text-gray-400'>{t('auth.login.demoCredentials')}</p>
           </div>
         </form>
-
-        <div className='text-center'>
-          <p className='text-sm text-gray-600 dark:text-gray-400'>
-            {t('auth.login.haveAccount')}{' '}
-            <Link
-              to='/register'
-              className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300'
-            >
-              {t('auth.login.signUp')}
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   )
