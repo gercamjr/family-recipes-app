@@ -60,10 +60,7 @@ const Login = () => {
           </h2>
           <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
             {t('auth.login.noAccount')}{' '}
-            <Link
-              to='/register'
-              className='font-medium text-blue-600 hover:text-blue-500'
-            >
+            <Link to='/register' className='font-medium text-blue-600 hover:text-blue-500'>
               {t('auth.login.signUp')}
             </Link>
           </p>
@@ -127,6 +124,7 @@ const Login = () => {
                       strokeWidth={2}
                       d='M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21'
                     />
+                  </svg>
                 ) : (
                   <svg className='h-5 w-5 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                     <path
@@ -154,9 +152,7 @@ const Login = () => {
             <div className='rounded-md bg-red-50 dark:bg-red-900/50 p-4'>
               <div className='flex'>
                 <div className='ml-3'>
-                  <h3 className='text-sm font-medium text-red-800 dark:text-red-200'>
-                    {t('common.error')}
-                  </h3>
+                  <h3 className='text-sm font-medium text-red-800 dark:text-red-200'>{t('common.error')}</h3>
                   <div className='mt-2 text-sm text-red-700 dark:text-red-300'>
                     <p>{error}</p>
                   </div>
@@ -213,9 +209,7 @@ const Login = () => {
           </div>
 
           <div className='text-center'>
-            <p className='text-sm text-gray-600 dark:text-gray-400'>
-              {t('auth.login.demoCredentials')}
-            </p>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>{t('auth.login.demoCredentials')}</p>
           </div>
         </form>
 

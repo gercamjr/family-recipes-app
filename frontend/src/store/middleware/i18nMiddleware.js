@@ -1,4 +1,4 @@
-import i18n from '../i18n'
+import i18n from '../../i18n'
 
 const i18nMiddleware = (store) => (next) => (action) => {
   // If the action is setLanguageWithI18n, sync with i18next
