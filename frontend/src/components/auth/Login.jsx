@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useAppDispatch, useAuth } from '../../store/hooks'
 import { loginStart, loginSuccess, loginFailure, clearError } from '../../store/slices/authSlice'
 import { useTranslation } from 'react-i18next'
+import { authService } from '../../services/auth'
 
 const Login = () => {
   const dispatch = useAppDispatch()
@@ -27,21 +28,9 @@ const Login = () => {
     dispatch(loginStart())
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await api.login(data)
-
-      // Mock successful login for now
-      if (data.email === 'demo@example.com' && data.password === 'password') {
-        dispatch(
-          loginSuccess({
-            user: { id: 1, email: data.email, name: 'Demo User' },
-            token: 'mock-jwt-token',
-          })
-        )
-        reset()
-      } else {
-        throw new Error(t('auth.login.invalidCredentials'))
-      }
+      const { token, user } = await authService.login(data)
+      dispatch(loginSuccess({ user, token }))
+      reset()
     } catch (error) {
       dispatch(loginFailure(error.message))
     }
