@@ -18,6 +18,7 @@
     "docker:down": "docker compose down",
     "docker:build": "docker compose build",
     "docker:rebuild": "docker compose build --no-cache",
+    "db:seed": "npm run db:seed --workspace=backend",
     "docker:logs": "docker compose logs -f",
     "docker:logs-backend": "docker compose logs -f backend",
     "docker:logs-frontend": "docker compose logs -f frontend",

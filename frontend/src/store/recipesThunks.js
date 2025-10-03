@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { recipesService } from '../../services/recipes'
+import { recipesService } from '../services/recipes'
 
 // Fetch recipes with pagination and filters
 export const fetchRecipes = createAsyncThunk('recipes/fetchRecipes', async (params = {}, { rejectWithValue }) => {
@@ -67,3 +67,19 @@ export const toggleFavorite = createAsyncThunk(
     }
   }
 )
+
+export const clearFilters = createAsyncThunk('recipes/clearFilters', async (_, { rejectWithValue }) => {
+  try {
+    return {}
+  } catch (error) {
+    return rejectWithValue(error.message)
+  }
+})
+
+export const updateFilters = createAsyncThunk('recipes/updateFilters', async (newFilters, { rejectWithValue }) => {
+  try {
+    return newFilters
+  } catch (error) {
+    return rejectWithValue(error.message)
+  }
+})

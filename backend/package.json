@@ -6,13 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "dev:seed": "node start-dev.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:setup": "node tests/createTestDb.js",
     "test:optimized": "jest --config jest.config.optimized.js",
     "test:verbose": "jest --verbose",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
