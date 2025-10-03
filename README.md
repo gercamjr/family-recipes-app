@@ -14,7 +14,7 @@ A secure, invite-only web app for family recipes with role-based access control,
 ## Technology Stack
 
 - **Frontend**: React.js, Tailwind CSS, i18next, Redux Toolkit
-- **Backend**: Node.js, Express.js, Sequelize ORM, PostgreSQL
+- **Backend**: Node.js, Express.js, Prisma ORM, PostgreSQL
 - **Storage**: Cloudinary for images/videos
 - **Deployment**: Vercel for full-stack hosting
 

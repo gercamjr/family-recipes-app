@@ -2,18 +2,18 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const { authenticateToken, requireRole } = require('../middleware/auth')
 const { hashPassword, verifyPassword, generateToken, generateInviteToken } = require('../utils/auth')
-// const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer')
 const prisma = require('../lib/prisma')
 const router = express.Router()
 
 // Email transporter
-// const transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// })
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+})
 
 // Validation middleware
 const validateRegistration = [
@@ -181,16 +181,31 @@ router.post(
         },
       })
 
-      // TODO: Send invitation email with token
+      // Send invitation email
+      const inviteUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/register?token=${inviteToken}`
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "You're invited to join Family Recipes!",
+        html: `
+          <h2>Welcome to Family Recipes!</h2>
+          <p>You've been invited to join our family recipe sharing platform.</p>
+          <p>Click the link below to register:</p>
+          <a href="${inviteUrl}">Accept Invitation</a>
+          <p>This link will expire in 7 days.</p>
+          <p>If you didn't expect this invitation, please ignore this email.</p>
+        `,
+      }
+
+      await transporter.sendMail(mailOptions)
 
       res.json({
-        message: 'Invitation token generated and assigned to you. Share it with the user.',
-        inviteToken,
+        message: 'Invitation sent successfully',
         expiresAt,
       })
     } catch (error) {
       console.error('Invite error:', error)
-      res.status(500).json({ error: 'Failed to generate invitation' })
+      res.status(500).json({ error: 'Failed to send invitation' })
     }
   }
 )

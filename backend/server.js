@@ -38,10 +38,10 @@ app.get('/api/health', (req, res) => {
 // API routes (to be implemented)
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/recipes', require('./routes/recipes'))
-// app.use('/api/comments', require('./routes/comments'));
-// app.use('/api/favorites', require('./routes/favorites'));
-// app.use('/api/upload', require('./routes/upload'));
-// app.use('/api/share', require('./routes/share'));
+app.use('/api/comments', require('./routes/comments'))
+app.use('/api/favorites', require('./routes/favorites'))
+app.use('/api/upload', require('./routes/upload'))
+app.use('/api/share', require('./routes/share'))
 
 // 404 handler
 app.use('/api/*', (req, res) => {

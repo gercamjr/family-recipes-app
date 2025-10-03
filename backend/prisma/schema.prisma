@@ -27,6 +27,10 @@ model Recipe {
   author   User @relation("UserRecipes", fields: [authorId], references: [id])
   authorId Int  @map("userId")
 
+  comments Comment[] @relation("RecipeComments")
+  favorites Favorite[] @relation("RecipeFavorites")
+  media    Media[]   @relation("RecipeMedia")
+
   @@map("recipes")
 }
 
@@ -43,12 +47,55 @@ model User {
   updatedAt          DateTime     @map("updatedAt") @db.Timestamptz(6)
 
   recipes         Recipe[]       @relation("UserRecipes")
+  comments        Comment[]      @relation("UserComments")
+  favorites       Favorite[]     @relation("UserFavorites")
   
   invitedBy   User?  @relation("Invitations", fields: [invitedById], references: [id])
   invitedById Int?   @map("invitedBy")
   invites     User[] @relation("Invitations")
 
   @@map("users")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @map("content")
+  createdAt DateTime @map("createdAt") @db.Timestamptz(6)
+  updatedAt DateTime @map("updatedAt") @db.Timestamptz(6)
+
+  author   User   @relation("UserComments", fields: [authorId], references: [id])
+  authorId Int    @map("userId")
+  recipe   Recipe @relation("RecipeComments", fields: [recipeId], references: [id])
+  recipeId Int    @map("recipeId")
+
+  @@map("comments")
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @map("createdAt") @db.Timestamptz(6)
+
+  user     User   @relation("UserFavorites", fields: [userId], references: [id])
+  userId   Int    @map("userId")
+  recipe   Recipe @relation("RecipeFavorites", fields: [recipeId], references: [id])
+  recipeId Int    @map("recipeId")
+
+  @@unique([userId, recipeId])
+  @@map("favorites")
+}
+
+model Media {
+  id       Int     @id @default(autoincrement())
+  url      String  @map("url")
+  type     String  @map("type") // 'image' or 'video'
+  filename String? @map("filename")
+  size     Int?    @map("size")
+  mimeType String? @map("mimeType")
+
+  recipe   Recipe @relation("RecipeMedia", fields: [recipeId], references: [id])
+  recipeId Int    @map("recipeId")
+
+  @@map("media")
 }
 
 enum LanguagePref {

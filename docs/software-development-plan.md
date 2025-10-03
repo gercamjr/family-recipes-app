@@ -33,8 +33,8 @@
 
 ## 3. Technology Stack
 
-- **Frontend**: React.js (v18+), Create React App or Vite for setup. Tailwind CSS for responsive design (mobile-first, breakpoints for phones/tablets). i18next for bilingual UI. Axios for API calls. React Hook Form for forms. Redux Toolkit for state (users, recipes).
-- **Backend**: Node.js (v20+), Express.js. Sequelize ORM for PostgreSQL. Passport.js + JWT for auth. Multer for file uploads to Cloudinary.
+- **Frontend**: React.js (v18+), Vite for setup. Tailwind CSS for responsive design (mobile-first, breakpoints for phones/tablets). i18next for bilingual UI. Axios for API calls. React Hook Form for forms. Redux Toolkit for state (users, recipes).
+- **Backend**: Node.js (v20+), Express.js. Prisma ORM for PostgreSQL. Passport.js + JWT for auth. Multer for file uploads to Cloudinary.
 - **Database**: PostgreSQL (schema: users, recipes, comments, favorites tables). Dual language fields (e.g., title_en, title_es).
 - **Other Libraries**:
   - Search: PostgreSQL full-text search for keywords/ingredients/categories.
@@ -56,24 +56,23 @@
 
 Use Agile: Daily commits, weekly reviews. Track progress in GitHub Issues.
 
-- **Phase 1: Setup and Repo Creation (Days 1-3)**
-
+- **Phase 1: Setup and Repo Creation (Completed ✅)**
   - Create new GitHub repo: `family-recipes-app` (private for security).
-  - Structure: `/frontend` (React), `/backend` (Node.js), `/docs` (for this plan).
-  - Setup monorepo with npm workspaces or separate repos if preferred.
-  - Install deps: `npm init`, add packages (express, sequelize, etc.).
+  - Structure: `/frontend` (React), `/backend` (Node.js), `/docs` (for this plan), `/docker` (dev environment).
+  - Setup monorepo with npm workspaces.
+  - Install deps: `npm init`, add packages (express, prisma, etc.).
   - Configure env vars: `.env` for DB URL, JWT secret, Cloudinary keys.
   - Init CI/CD: GitHub Actions workflow for lint/test/build on push/PR.
   - Setup Vercel: Link repo, configure for full-stack (frontend + API).
+  - Setup Docker for local development.
 
-- **Phase 2: Backend Development (Days 4-10)**
-
-  - Setup Express server, connect to PostgreSQL (use Vercel's Postgres or free ElephantSQL).
+- **Phase 2: Backend Development (Completed ✅)**
+  - Setup Express server, connect to PostgreSQL via Prisma.
   - Implement auth: Register (admin-only invites via email token?), login, JWT with roles.
   - API Endpoints:
     - Auth: /register (invite-only), /login, /invite (admin).
     - Recipes: /recipes (GET all/search, POST create, PUT update, DELETE).
-      - Search: Query params for keywords/categories/ingredients (use Sequelize scopes).
+      - Search: Query params for keywords/categories/ingredients (use Prisma queries).
     - Media: /upload (POST image/video to Cloudinary, return URL).
     - Comments: /comments (POST/GET per recipe).
     - Favorites: /favorites (POST/GET/DELETE per user/recipe).
@@ -81,9 +80,8 @@ Use Agile: Daily commits, weekly reviews. Track progress in GitHub Issues.
   - Add middleware for role checks (e.g., editors can only edit own recipes).
   - Bilingual: APIs return data based on user's language_pref, or all fields for client handling.
 
-- **Phase 3: Frontend Development (Days 11-17)**
-
-  - Setup React app, integrate Tailwind.
+- **Phase 3: Frontend Development (Pending)**
+  - Setup React app with Vite, integrate Tailwind.
   - Components: Login/Register, Dashboard (recipe list/search), RecipeForm (CRUD with dual lang fields), RecipeDetail (view, comments, favorites, share buttons), LanguageSwitcher.
   - Responsiveness: Tailwind classes (e.g., sm/md/lg breakpoints for phones/tablets).
   - PWA: Add manifest.json, service worker for offline recipe viewing.
@@ -91,16 +89,14 @@ Use Agile: Daily commits, weekly reviews. Track progress in GitHub Issues.
   - File uploads: Drag-drop UI, send to backend.
   - Sharing: Buttons for print (window.print), PDF (html2pdf), email (link to mailto or API call).
 
-- **Phase 4: Integration, Testing, and Security (Days 18-24)**
-
+- **Phase 4: Integration, Testing, and Security (Pending)**
   - Full integration: Test auth flows, role restrictions.
   - Tests: 80% coverage—unit (components/logic), integration (APIs), e2e (manual or Cypress if time).
   - Security: Enable HTTPS on Vercel, validate inputs (Joi or Zod), rate-limit APIs.
   - Mobile testing: Chrome DevTools emulators for iOS/Android, real devices if available.
   - Bilingual testing: Switch languages, ensure recipe content displays correctly.
 
-- **Phase 5: Deployment and CI/CD (Days 25-28)**
-
+- **Phase 5: Deployment and CI/CD (Pending)**
   - Environments: Preview (on PRs via Vercel), Production.
   - CI/CD Pipeline (GitHub Actions YAML):
 
@@ -141,7 +137,7 @@ Use Agile: Daily commits, weekly reviews. Track progress in GitHub Issues.
 
   - Launch: Deploy MVP, invite test users, monitor logs.
 
-- **Phase 6: Post-Launch (Ongoing)**
+- **Phase 6: Post-Launch (Future)**
   - Feedback loop: Add GitHub Issues for bugs/features.
   - Maintenance: Weekly backups (Vercel tools), updates.
   - Future: AI integration (e.g., via OpenAI API endpoint), native app (port React to React Native).
