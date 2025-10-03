@@ -64,7 +64,9 @@
     "cookTime": "Cook Time",
     "servings": "Servings",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "noRecipes": "No recipes found",
+    "noRecipesDesc": "Get started by adding your first recipe"
   },
   "common": {
     "loading": "Loading...",
@@ -76,7 +78,10 @@
     "close": "Close",
     "back": "Back",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "view": "View",
+    "page": "Page",
+    "of": "of"
   },
   "validation": {
     "required": "This field is required",

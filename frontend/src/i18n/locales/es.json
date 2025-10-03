@@ -64,7 +64,9 @@
     "cookTime": "Tiempo de cocción",
     "servings": "Porciones",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "noRecipes": "No se encontraron recetas",
+    "noRecipesDesc": "Comienza agregando tu primera receta"
   },
   "common": {
     "loading": "Cargando...",
@@ -76,7 +78,10 @@
     "close": "Cerrar",
     "back": "Atrás",
     "next": "Siguiente",
-    "previous": "Anterior"
+    "previous": "Anterior",
+    "view": "Ver",
+    "page": "Página",
+    "of": "de"
   },
   "validation": {
     "required": "Este campo es obligatorio",
