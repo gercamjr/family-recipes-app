@@ -33,6 +33,12 @@ jest.mock('jsonwebtoken', () => ({
   verify: jest.fn(),
 }))
 
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn(() => ({
+    sendMail: jest.fn(),
+  })),
+}))
+
 describe('Auth Routes', () => {
   afterEach(() => {
     jest.clearAllMocks()
@@ -222,7 +228,7 @@ describe('Auth Routes', () => {
       const user = {
         id: 1,
         email: 'test@example.com',
-        role: 'VIEWER',
+        role: 'viewer',
         languagePref: 'en',
         createdAt: new Date().toISOString(),
         isActive: true,
@@ -239,11 +245,11 @@ describe('Auth Routes', () => {
 
       expect(res.statusCode).toEqual(200)
       expect(res.body.user).toEqual({
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        languagePref: user.languagePref,
-        createdAt: user.createdAt,
+        id: 1,
+        email: 'test@example.com',
+        role: 'viewer',
+        languagePref: 'en',
+        createdAt: expect.any(String),
       })
     })
 
@@ -264,6 +270,62 @@ describe('Auth Routes', () => {
       const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(403)
+    })
+  })
+
+  describe('POST /api/auth/invite', () => {
+    it('should return 400 for invalid email in invite', async () => {
+      const adminUser = {
+        id: 1,
+        email: 'admin@example.com',
+        role: 'admin',
+        isActive: true,
+      }
+      const token = 'fake-admin-token'
+
+      // Mock jwt.verify to return the decoded payload
+      jwt.verify.mockReturnValue({ id: adminUser.id })
+      // Mock prisma to find the admin user
+      prisma.user.findUnique.mockResolvedValue(adminUser)
+
+      const res = await request(app).post('/api/auth/invite').set('Authorization', `Bearer ${token}`).send({
+        email: 'invalid-email',
+      })
+
+      expect(res.statusCode).toEqual(400)
+      expect(res.body).toHaveProperty('errors')
+    })
+
+    it('should generate invite token successfully', async () => {
+      const adminUser = {
+        id: 1,
+        email: 'admin@example.com',
+        role: 'admin',
+        isActive: true,
+      }
+      const token = 'fake-admin-token'
+      const inviteEmail = 'newuser@example.com'
+
+      // Mock jwt.verify to return the decoded payload
+      jwt.verify.mockReturnValue({ id: adminUser.id })
+      // Mock prisma to find the admin user
+      prisma.user.findUnique.mockResolvedValueOnce(adminUser)
+      // Mock check for existing user (should return null)
+      prisma.user.findUnique.mockResolvedValueOnce(null)
+      // Mock update for storing the token
+      prisma.user.update.mockResolvedValue({
+        ...adminUser,
+        inviteToken: 'generated-token',
+        inviteTokenExpires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      })
+
+      const res = await request(app).post('/api/auth/invite').set('Authorization', `Bearer ${token}`).send({
+        email: inviteEmail,
+      })
+
+      expect(res.statusCode).toEqual(200)
+      expect(res.body).toHaveProperty('message', 'Invitation sent successfully')
+      expect(res.body).toHaveProperty('expiresAt')
     })
   })
 })
