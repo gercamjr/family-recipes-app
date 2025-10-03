@@ -2,18 +2,18 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const { authenticateToken, requireRole } = require('../middleware/auth')
 const { hashPassword, verifyPassword, generateToken, generateInviteToken } = require('../utils/auth')
-const nodemailer = require('nodemailer')
+// const nodemailer = require('nodemailer')
 const prisma = require('../lib/prisma')
 const router = express.Router()
 
 // Email transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-})
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// })
 
 // Validation middleware
 const validateRegistration = [
