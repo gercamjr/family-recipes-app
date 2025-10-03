@@ -1,6 +1,6 @@
 const express = require('express')
 const { body, validationResult, query } = require('express-validator')
-const { authenticateToken, requireRole, optionalAuth } = require('../middleware/auth')
+const { authenticateToken, optionalAuth } = require('../middleware/auth')
 const { formatRecipeResponse } = require('../utils/auth')
 const prisma = require('../lib/prisma')
 const router = express.Router()
