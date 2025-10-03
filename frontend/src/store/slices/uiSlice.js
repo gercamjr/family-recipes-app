@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  language: 'en', // 'en' or 'es'
+  language: 'es', // 'en' or 'es' - default to Spanish
   theme: 'light', // 'light' or 'dark'
   sidebarOpen: false,
   modal: {
@@ -32,6 +32,10 @@ const uiSlice = createSlice({
   reducers: {
     setLanguage: (state, action) => {
       state.language = action.payload
+    },
+    setLanguageWithI18n: (state, action) => {
+      state.language = action.payload
+      // This action will be handled by middleware to sync with i18next
     },
     setTheme: (state, action) => {
       state.theme = action.payload
@@ -100,6 +104,7 @@ const uiSlice = createSlice({
 
 export const {
   setLanguage,
+  setLanguageWithI18n,
   setTheme,
   toggleSidebar,
   setSidebarOpen,

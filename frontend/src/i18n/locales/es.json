@@ -1,0 +1,85 @@
+{
+  "app": {
+    "title": "Recetas Familiares",
+    "welcome": "¡Bienvenido de vuelta!",
+    "dashboard": "Panel de Recetas",
+    "comingSoon": "Próximamente...",
+    "logout": "Cerrar Sesión",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "showPassword": "Mostrar contraseña",
+      "submit": "Iniciar Sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate aquí",
+      "invalidCredentials": "Credenciales inválidas",
+      "demoCredentials": "Credenciales de demo: demo@example.com / password",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión aquí"
+    },
+    "register": {
+      "title": "Crear Cuenta",
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "showPassword": "Mostrar contraseña",
+      "showConfirmPassword": "Mostrar confirmación",
+      "submit": "Crear Cuenta",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión aquí",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+      "emailRequired": "El correo electrónico es obligatorio",
+      "nameRequired": "El nombre es obligatorio"
+    }
+  },
+  "user": {
+    "user": "Usuario",
+    "language": "Idioma",
+    "theme": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
+  "recipes": {
+    "sampleRecipe": "Receta de Ejemplo",
+    "recipeImage": "Imagen de Receta",
+    "addRecipe": "Agregar Receta",
+    "editRecipe": "Editar Receta",
+    "deleteRecipe": "Eliminar Receta",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "categories": "Categorías",
+    "tags": "Etiquetas",
+    "ingredients": "Ingredientes",
+    "instructions": "Instrucciones",
+    "prepTime": "Tiempo de preparación",
+    "cookTime": "Tiempo de cocción",
+    "servings": "Porciones",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "email": "Ingresa un correo electrónico válido",
+    "minLength": "Debe tener al menos {{count}} caracteres",
+    "maxLength": "No puede tener más de {{count}} caracteres"
+  }
+}

@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { useAppDispatch, useAuth, useLanguage } from '../../store/hooks'
+import { useAppDispatch, useAuth } from '../../store/hooks'
 import { loginStart, loginSuccess, loginFailure, clearError } from '../../store/slices/authSlice'
+import { useTranslation } from 'react-i18next'
 
 const Login = () => {
   const dispatch = useAppDispatch()
   const { loading, error } = useAuth()
-  const language = useLanguage()
+  const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
 
   const {
@@ -39,7 +40,7 @@ const Login = () => {
         )
         reset()
       } else {
-        throw new Error(language === 'en' ? 'Invalid credentials' : 'Credenciales inválidas')
+        throw new Error(t('auth.login.invalidCredentials'))
       }
     } catch (error) {
       dispatch(loginFailure(error.message))
@@ -55,12 +56,16 @@ const Login = () => {
       <div className='max-w-md w-full space-y-8'>
         <div>
           <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white'>
-            {language === 'en' ? 'Sign in to your account' : 'Inicia sesión en tu cuenta'}
+            {t('auth.login.title')}
           </h2>
           <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
-            {language === 'en'
-              ? "Or create a new account if you don't have one"
-              : 'O crea una nueva cuenta si no tienes una'}
+            {t('auth.login.noAccount')}{' '}
+            <Link
+              to='/register'
+              className='font-medium text-blue-600 hover:text-blue-500'
+            >
+              {t('auth.login.signUp')}
+            </Link>
           </p>
         </div>
 
@@ -68,14 +73,14 @@ const Login = () => {
           <div className='rounded-md shadow-sm -space-y-px'>
             <div>
               <label htmlFor='email' className='sr-only'>
-                {language === 'en' ? 'Email address' : 'Dirección de correo electrónico'}
+                {t('auth.login.email')}
               </label>
               <input
                 {...register('email', {
-                  required: language === 'en' ? 'Email is required' : 'El correo electrónico es obligatorio',
+                  required: t('validation.required'),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: language === 'en' ? 'Invalid email address' : 'Dirección de correo electrónico inválida',
+                    message: t('validation.email'),
                   },
                 })}
                 id='email'
@@ -84,24 +89,21 @@ const Login = () => {
                 autoComplete='email'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800'
-                placeholder={language === 'en' ? 'Email address' : 'Dirección de correo electrónico'}
+                placeholder={t('auth.login.email')}
               />
               {errors.email && <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.email.message}</p>}
             </div>
 
             <div className='relative'>
               <label htmlFor='password' className='sr-only'>
-                {language === 'en' ? 'Password' : 'Contraseña'}
+                {t('auth.login.password')}
               </label>
               <input
                 {...register('password', {
-                  required: language === 'en' ? 'Password is required' : 'La contraseña es obligatoria',
+                  required: t('validation.required'),
                   minLength: {
                     value: 6,
-                    message:
-                      language === 'en'
-                        ? 'Password must be at least 6 characters'
-                        : 'La contraseña debe tener al menos 6 caracteres',
+                    message: t('auth.register.passwordTooShort'),
                   },
                 })}
                 id='password'
@@ -110,7 +112,7 @@ const Login = () => {
                 autoComplete='current-password'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 pr-10'
-                placeholder={language === 'en' ? 'Password' : 'Contraseña'}
+                placeholder={t('auth.login.password')}
               />
               <button
                 type='button'
@@ -125,7 +127,6 @@ const Login = () => {
                       strokeWidth={2}
                       d='M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21'
                     />
-                  </svg>
                 ) : (
                   <svg className='h-5 w-5 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                     <path
@@ -154,7 +155,7 @@ const Login = () => {
               <div className='flex'>
                 <div className='ml-3'>
                   <h3 className='text-sm font-medium text-red-800 dark:text-red-200'>
-                    {language === 'en' ? 'Login Error' : 'Error de Inicio de Sesión'}
+                    {t('common.error')}
                   </h3>
                   <div className='mt-2 text-sm text-red-700 dark:text-red-300'>
                     <p>{error}</p>
@@ -166,7 +167,7 @@ const Login = () => {
                         onClick={handleClearError}
                         className='bg-red-50 dark:bg-red-900/50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 dark:focus:ring-offset-red-900/50 focus:ring-red-600'
                       >
-                        {language === 'en' ? 'Dismiss' : 'Descartar'}
+                        {t('common.close')}
                       </button>
                     </div>
                   </div>
@@ -203,33 +204,29 @@ const Login = () => {
                       d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                     ></path>
                   </svg>
-                  {language === 'en' ? 'Signing in...' : 'Iniciando sesión...'}
+                  {t('common.loading')}
                 </div>
-              ) : language === 'en' ? (
-                'Sign in'
               ) : (
-                'Iniciar sesión'
+                t('auth.login.submit')
               )}
             </button>
           </div>
 
           <div className='text-center'>
             <p className='text-sm text-gray-600 dark:text-gray-400'>
-              {language === 'en'
-                ? 'Demo credentials: demo@example.com / password'
-                : 'Credenciales de demo: demo@example.com / password'}
+              {t('auth.login.demoCredentials')}
             </p>
           </div>
         </form>
 
         <div className='text-center'>
           <p className='text-sm text-gray-600 dark:text-gray-400'>
-            {language === 'en' ? "Don't have an account?" : '¿No tienes una cuenta?'}{' '}
+            {t('auth.login.haveAccount')}{' '}
             <Link
               to='/register'
               className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300'
             >
-              {language === 'en' ? 'Create one here' : 'Crea una aquí'}
+              {t('auth.login.signUp')}
             </Link>
           </p>
         </div>

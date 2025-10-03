@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { useAppDispatch, useAuth, useLanguage } from '../../store/hooks'
+import { useAppDispatch, useAuth } from '../../store/hooks'
 import { registerStart, registerSuccess, registerFailure, clearError } from '../../store/slices/authSlice'
+import { useTranslation } from 'react-i18next'
 
 const Register = () => {
   const dispatch = useAppDispatch()
   const { loading, error } = useAuth()
-  const language = useLanguage()
+  const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -57,12 +58,13 @@ const Register = () => {
       <div className='max-w-md w-full space-y-8'>
         <div>
           <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white'>
-            {language === 'en' ? 'Create your account' : 'Crea tu cuenta'}
+            {t('auth.register.title')}
           </h2>
           <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
-            {language === 'en'
-              ? 'Join our family recipes community'
-              : 'Únete a nuestra comunidad de recetas familiares'}
+            {t('auth.register.haveAccount')}{' '}
+            <Link to='/login' className='font-medium text-blue-600 hover:text-blue-500'>
+              {t('auth.register.signIn')}
+            </Link>
           </p>
         </div>
 
@@ -70,17 +72,14 @@ const Register = () => {
           <div className='rounded-md shadow-sm -space-y-px'>
             <div>
               <label htmlFor='name' className='sr-only'>
-                {language === 'en' ? 'Full Name' : 'Nombre Completo'}
+                {t('register.fullName')}
               </label>
               <input
                 {...register('name', {
-                  required: language === 'en' ? 'Name is required' : 'El nombre es obligatorio',
+                  required: t('register.nameRequired'),
                   minLength: {
                     value: 2,
-                    message:
-                      language === 'en'
-                        ? 'Name must be at least 2 characters'
-                        : 'El nombre debe tener al menos 2 caracteres',
+                    message: t('register.nameMinLength'),
                   },
                 })}
                 id='name'
@@ -89,21 +88,21 @@ const Register = () => {
                 autoComplete='name'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800'
-                placeholder={language === 'en' ? 'Full Name' : 'Nombre Completo'}
+                placeholder={t('register.fullName')}
               />
               {errors.name && <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.name.message}</p>}
             </div>
 
             <div>
               <label htmlFor='email' className='sr-only'>
-                {language === 'en' ? 'Email address' : 'Dirección de correo electrónico'}
+                {t('register.emailAddress')}
               </label>
               <input
                 {...register('email', {
-                  required: language === 'en' ? 'Email is required' : 'El correo electrónico es obligatorio',
+                  required: t('register.emailRequired'),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: language === 'en' ? 'Invalid email address' : 'Dirección de correo electrónico inválida',
+                    message: t('register.invalidEmail'),
                   },
                 })}
                 id='email'
@@ -112,31 +111,25 @@ const Register = () => {
                 autoComplete='email'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800'
-                placeholder={language === 'en' ? 'Email address' : 'Dirección de correo electrónico'}
+                placeholder={t('register.emailAddress')}
               />
               {errors.email && <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.email.message}</p>}
             </div>
 
             <div className='relative'>
               <label htmlFor='password' className='sr-only'>
-                {language === 'en' ? 'Password' : 'Contraseña'}
+                {t('register.password')}
               </label>
               <input
                 {...register('password', {
-                  required: language === 'en' ? 'Password is required' : 'La contraseña es obligatoria',
+                  required: t('register.passwordRequired'),
                   minLength: {
                     value: 8,
-                    message:
-                      language === 'en'
-                        ? 'Password must be at least 8 characters'
-                        : 'La contraseña debe tener al menos 8 caracteres',
+                    message: t('register.passwordMinLength'),
                   },
                   pattern: {
                     value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                    message:
-                      language === 'en'
-                        ? 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
-                        : 'La contraseña debe contener al menos una letra mayúscula, una minúscula y un número',
+                    message: t('register.passwordPattern'),
                   },
                 })}
                 id='password'
@@ -145,7 +138,7 @@ const Register = () => {
                 autoComplete='new-password'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 pr-10'
-                placeholder={language === 'en' ? 'Password' : 'Contraseña'}
+                placeholder={t('register.password')}
               />
               <button
                 type='button'
@@ -185,14 +178,12 @@ const Register = () => {
 
             <div className='relative'>
               <label htmlFor='confirmPassword' className='sr-only'>
-                {language === 'en' ? 'Confirm Password' : 'Confirmar Contraseña'}
+                {t('register.confirmPassword')}
               </label>
               <input
                 {...register('confirmPassword', {
-                  required: language === 'en' ? 'Please confirm your password' : 'Por favor confirma tu contraseña',
-                  validate: (value) =>
-                    value === password ||
-                    (language === 'en' ? 'Passwords do not match' : 'Las contraseñas no coinciden'),
+                  required: t('register.confirmPasswordRequired'),
+                  validate: (value) => value === password || t('register.passwordsDoNotMatch'),
                 })}
                 id='confirmPassword'
                 name='confirmPassword'
@@ -200,7 +191,7 @@ const Register = () => {
                 autoComplete='new-password'
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 pr-10'
-                placeholder={language === 'en' ? 'Confirm Password' : 'Confirmar Contraseña'}
+                placeholder={t('register.confirmPassword')}
               />
               <button
                 type='button'
@@ -244,7 +235,7 @@ const Register = () => {
               <div className='flex'>
                 <div className='ml-3'>
                   <h3 className='text-sm font-medium text-red-800 dark:text-red-200'>
-                    {language === 'en' ? 'Registration Error' : 'Error de Registro'}
+                    {t('register.registrationError')}
                   </h3>
                   <div className='mt-2 text-sm text-red-700 dark:text-red-300'>
                     <p>{error}</p>
@@ -256,7 +247,7 @@ const Register = () => {
                         onClick={handleClearError}
                         className='bg-red-50 dark:bg-red-900/50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 dark:focus:ring-offset-red-900/50 focus:ring-red-600'
                       >
-                        {language === 'en' ? 'Dismiss' : 'Descartar'}
+                        {t('register.dismiss')}
                       </button>
                     </div>
                   </div>
@@ -293,12 +284,10 @@ const Register = () => {
                       d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                     ></path>
                   </svg>
-                  {language === 'en' ? 'Creating account...' : 'Creando cuenta...'}
+                  {t('register.creatingAccount')}
                 </div>
-              ) : language === 'en' ? (
-                'Create Account'
               ) : (
-                'Crear Cuenta'
+                t('register.createAccount')
               )}
             </button>
           </div>
@@ -306,12 +295,12 @@ const Register = () => {
 
         <div className='text-center'>
           <p className='text-sm text-gray-600 dark:text-gray-400'>
-            {language === 'en' ? 'Already have an account?' : '¿Ya tienes una cuenta?'}{' '}
+            {t('register.alreadyHaveAccount')}{' '}
             <Link
               to='/login'
               className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300'
             >
-              {language === 'en' ? 'Sign in here' : 'Inicia sesión aquí'}
+              {t('register.signInHere')}
             </Link>
           </p>
         </div>

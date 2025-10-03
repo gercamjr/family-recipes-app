@@ -1,0 +1,85 @@
+{
+  "app": {
+    "title": "Family Recipes",
+    "welcome": "Welcome back!",
+    "dashboard": "Recipe Dashboard",
+    "comingSoon": "Coming soon...",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "showPassword": "Show password",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here",
+      "invalidCredentials": "Invalid credentials",
+      "demoCredentials": "Demo credentials: demo@example.com / password",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in here"
+    },
+    "register": {
+      "title": "Create Account",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "showPassword": "Show password",
+      "showConfirmPassword": "Show confirmation",
+      "submit": "Create Account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in here",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 6 characters",
+      "emailRequired": "Email is required",
+      "nameRequired": "Name is required"
+    }
+  },
+  "user": {
+    "user": "User",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "recipes": {
+    "sampleRecipe": "Sample Recipe",
+    "recipeImage": "Recipe Image",
+    "addRecipe": "Add Recipe",
+    "editRecipe": "Edit Recipe",
+    "deleteRecipe": "Delete Recipe",
+    "search": "Search",
+    "filter": "Filter",
+    "categories": "Categories",
+    "tags": "Tags",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "prepTime": "Prep Time",
+    "cookTime": "Cook Time",
+    "servings": "Servings",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email",
+    "minLength": "Must be at least {{count}} characters",
+    "maxLength": "Cannot be more than {{count}} characters"
+  }
+}
