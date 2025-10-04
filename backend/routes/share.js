@@ -1,15 +1,9 @@
 const express = require('express')
-const { body, validationResult } = require('express-validator')
 const { authenticateToken, optionalAuth } = require('../middleware/auth')
 const { formatRecipeResponse } = require('../utils/auth')
+const { validate, emailShareSchema } = require('../utils/validation')
 const prisma = require('../lib/prisma')
 const router = express.Router()
-
-// Validation middleware
-const validateEmailShare = [
-  body('email').isEmail().normalizeEmail(),
-  body('message').optional().trim().isLength({ max: 500 }),
-]
 
 // @route   GET /api/share/pdf/:recipeId
 // @desc    Generate PDF for recipe sharing
@@ -54,13 +48,8 @@ router.get('/pdf/:recipeId', optionalAuth, async (req, res) => {
 // @route   POST /api/share/email/:recipeId
 // @desc    Share recipe via email
 // @access  Private
-router.post('/email/:recipeId', authenticateToken, validateEmailShare, async (req, res) => {
+router.post('/email/:recipeId', authenticateToken, validate(emailShareSchema), async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
     const recipeId = parseInt(req.params.recipeId)
     const { email } = req.body
 

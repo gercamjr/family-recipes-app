@@ -1,11 +1,8 @@
 const express = require('express')
-const { body, validationResult } = require('express-validator')
 const { authenticateToken } = require('../middleware/auth')
+const { validate, commentSchema } = require('../utils/validation')
 const prisma = require('../lib/prisma')
 const router = express.Router()
-
-// Validation middleware
-const validateComment = [body('content').notEmpty().trim().isLength({ max: 1000 })]
 
 // @route   GET /api/comments/:recipeId
 // @desc    Get comments for a recipe
@@ -48,13 +45,8 @@ router.get('/:recipeId', async (req, res) => {
 // @route   POST /api/comments/:recipeId
 // @desc    Add comment to recipe
 // @access  Private
-router.post('/:recipeId', authenticateToken, validateComment, async (req, res) => {
+router.post('/:recipeId', authenticateToken, validate(commentSchema), async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
     const recipeId = parseInt(req.params.recipeId)
     const { content } = req.body
 
@@ -90,13 +82,8 @@ router.post('/:recipeId', authenticateToken, validateComment, async (req, res) =
 // @route   PUT /api/comments/:id
 // @desc    Update comment
 // @access  Private (comment author or admin)
-router.put('/:id', authenticateToken, validateComment, async (req, res) => {
+router.put('/:id', authenticateToken, validate(commentSchema), async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
     const commentId = parseInt(req.params.id)
     const { content } = req.body
 
