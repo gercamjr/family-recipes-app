@@ -73,7 +73,6 @@ const Login = () => {
                 name='email'
                 type='email'
                 autoComplete='email'
-                required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800'
                 placeholder={t('auth.login.email')}
               />
@@ -96,7 +95,6 @@ const Login = () => {
                 name='password'
                 type={showPassword ? 'text' : 'password'}
                 autoComplete='current-password'
-                required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 pr-10'
                 placeholder={t('auth.login.password')}
               />

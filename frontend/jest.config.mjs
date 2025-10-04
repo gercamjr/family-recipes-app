@@ -8,4 +8,11 @@ export default {
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_API_BASE_URL: 'http://localhost:3001/api',
+      },
+    },
+  },
 }
