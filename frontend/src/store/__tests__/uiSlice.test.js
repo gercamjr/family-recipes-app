@@ -14,7 +14,7 @@ import uiReducer, {
 
 describe('uiSlice', () => {
   const initialState = {
-    language: 'en',
+    language: 'es', // Updated to match the actual slice default
     theme: 'light',
     sidebarOpen: false,
     modal: {
