@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAppDispatch, useAuth } from '../../store/hooks'
 import { loginStart, loginSuccess, loginFailure, clearError } from '../../store/slices/authSlice'
@@ -11,6 +11,7 @@ const Login = () => {
   const { loading, error } = useAuth()
   const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
 
   const {
     register,
@@ -31,6 +32,7 @@ const Login = () => {
       const { token, user } = await authService.login(data)
       dispatch(loginSuccess({ user, token }))
       reset()
+      navigate('/') // Navigate to the main app page after successful login
     } catch (error) {
       dispatch(loginFailure(error.message))
     }

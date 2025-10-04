@@ -1,14 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 
-// Polyfill for import.meta.env in Jest
-global.import = {
-  meta: {
-    env: {
-      VITE_API_BASE_URL: 'http://localhost:3001/api',
-      // Add other VITE_ env vars as needed
-    },
-  },
-}
-
-// Set environment variable for tests (used by config.js)
+// Set environment variable for tests (used by config.mjs)
 process.env.VITE_API_BASE_URL = 'http://localhost:3001/api'

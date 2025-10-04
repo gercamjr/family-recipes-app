@@ -2,21 +2,22 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
+import { vi } from 'vitest'
 import Register from '../Register'
 import authSlice from '../../../store/slices/authSlice'
 import uiSlice from '../../../store/slices/uiSlice'
 import i18nMiddleware from '../../../store/middleware/i18nMiddleware'
 
 // Mock the api service
-jest.mock('../../../services/api', () => ({
-  post: jest.fn(),
-  get: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
+vi.mock('../../../services/api', () => ({
+  post: vi.fn(),
+  get: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
 }))
 
 // Mock react-i18next
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key) => key, // Return key as-is for testing
     i18n: { language: 'en' },
@@ -24,12 +25,14 @@ jest.mock('react-i18next', () => ({
 }))
 
 // Mock i18n middleware
-jest.mock('../../../store/middleware/i18nMiddleware', () => jest.fn(() => (next) => (action) => next(action)))
+vi.mock('../../../store/middleware/i18nMiddleware', () => ({
+  default: vi.fn(() => (next) => (action) => next(action)),
+}))
 
 // Mock auth service
-jest.mock('../../../services/auth', () => ({
+vi.mock('../../../services/auth', () => ({
   authService: {
-    register: jest.fn(),
+    register: vi.fn(),
   },
 }))
 
@@ -71,7 +74,7 @@ const renderWithProviders = (
 
 describe('Register', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders registration form correctly', () => {
