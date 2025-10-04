@@ -1,0 +1,127 @@
+{
+  "app": {
+    "title": "Family Recipes",
+    "welcome": "Welcome back!",
+    "dashboard": "Recipe Dashboard",
+    "comingSoon": "Coming soon...",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "showPassword": "Show password",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here",
+      "invalidCredentials": "Invalid credentials",
+      "demoCredentials": "Demo credentials: demo@example.com / password",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in here"
+    },
+    "register": {
+      "title": "Create Account",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "inviteToken": "Invitation Token",
+      "showPassword": "Show password",
+      "showConfirmPassword": "Show confirmation",
+      "submit": "Create Account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in here",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "emailRequired": "Email is required",
+      "nameRequired": "Name is required",
+      "inviteTokenRequired": "Invitation token is required"
+    }
+  },
+  "user": {
+    "user": "User",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "recipes": {
+    "sampleRecipe": "Sample Recipe",
+    "recipeImage": "Recipe Image",
+    "addRecipe": "Add Recipe",
+    "editRecipe": "Edit Recipe",
+    "deleteRecipe": "Delete Recipe",
+    "search": "Search",
+    "filter": "Filter",
+    "categories": "Categories",
+    "tags": "Tags",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "prepTime": "Prep Time",
+    "cookTime": "Cook Time",
+    "servings": "Servings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "noRecipes": "No recipes found",
+    "noRecipesDesc": "Get started by adding your first recipe"
+  },
+  "recipe": {
+    "form": {
+      "createTitle": "Create New Recipe",
+      "editTitle": "Edit Recipe",
+      "image": "Recipe Image",
+      "titleEn": "Title (English)",
+      "titleEs": "Title (Spanish)",
+      "ingredientsEn": "Ingredients (English)",
+      "ingredientsEs": "Ingredients (Spanish)",
+      "instructionsEn": "Instructions (English)",
+      "instructionsEs": "Instructions (Spanish)",
+      "prepTime": "Prep Time (minutes)",
+      "cookTime": "Cook Time (minutes)",
+      "servings": "Servings",
+      "categories": "Categories",
+      "tags": "Tags",
+      "addIngredient": "Add Ingredient",
+      "required": "This field is required",
+      "noPermission": "You don't have permission to edit this recipe"
+    },
+    "detail": {
+      "ingredients": "Ingredients",
+      "instructions": "Instructions",
+      "share": "Share Recipe",
+      "print": "Print",
+      "downloadPdf": "Download PDF",
+      "email": "Email",
+      "copyLink": "Copy Link",
+      "comments": "Comments",
+      "addComment": "Add a comment...",
+      "postComment": "Post Comment",
+      "notFound": "Recipe not found",
+      "noComments": "No comments yet"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "view": "View",
+    "page": "Page",
+    "of": "of"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email",
+    "minLength": "Must be at least {{count}} characters",
+    "maxLength": "Cannot be more than {{count}} characters"
+  }
+}

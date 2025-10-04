@@ -22,4 +22,12 @@ module.exports = {
       version: 'detect',
     },
   },
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.js', '**/__tests__/**/*.jsx', '**/*.test.js', '**/*.test.jsx'],
+      env: {
+        jest: true,
+      },
+    },
+  ],
 }

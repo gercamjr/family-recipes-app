@@ -9,23 +9,23 @@ datasource db {
 
 model Recipe {
   id             Int      @id @default(autoincrement())
-  titleEn        String   @map("titleEn") @db.VarChar(255)
-  titleEs        String?  @map("titleEs") @db.VarChar(255)
-  ingredientsEn  Json     @map("ingredientsEn") @db.Json
-  ingredientsEs  Json?    @map("ingredientsEs") @db.Json
-  instructionsEn String   @map("instructionsEn")
-  instructionsEs String?  @map("instructionsEs")
-  prepTime       Int?
-  cookTime       Int?
+  titleEn        String   @map("title_en") @db.VarChar(255)
+  titleEs        String?  @map("title_es") @db.VarChar(255)
+  ingredientsEn  Json     @map("ingredients_en") @db.Json
+  ingredientsEs  Json?    @map("ingredients_es") @db.Json
+  instructionsEn String   @map("instructions_en")
+  instructionsEs String?  @map("instructions_es")
+  prepTime       Int?     @map("prep_time")
+  cookTime       Int?     @map("cook_time")
   servings       Int?
   tags           String[] @default([])
   categories     String[] @default([])
-  isPublic       Boolean  @default(true) @map("isPublic")
-  createdAt      DateTime @map("createdAt") @db.Timestamptz(6)
-  updatedAt      DateTime @map("updatedAt") @db.Timestamptz(6)
+  isPublic       Boolean  @default(true) @map("is_public")
+  createdAt      DateTime @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @map("updated_at") @db.Timestamptz(6)
 
   author   User @relation("UserRecipes", fields: [authorId], references: [id])
-  authorId Int  @map("userId")
+  authorId Int  @map("user_id")
 
   comments Comment[] @relation("RecipeComments")
   favorites Favorite[] @relation("RecipeFavorites")
@@ -37,21 +37,21 @@ model Recipe {
 model User {
   id                 Int          @id @default(autoincrement())
   email              String       @unique @db.VarChar(255)
-  passwordHash       String       @map("passwordHash") @db.VarChar(255)
+  passwordHash       String       @map("password_hash") @db.VarChar(255)
   role               Role         @default(viewer)
-  languagePref       LanguagePref @default(en) @map("languagePref")
-  isActive           Boolean      @default(true) @map("isActive")
-  inviteToken        String?      @map("inviteToken") @db.VarChar(255)
-  inviteTokenExpires DateTime?    @map("inviteTokenExpires") @db.Timestamptz(6)
-  createdAt          DateTime     @map("createdAt") @db.Timestamptz(6)
-  updatedAt          DateTime     @map("updatedAt") @db.Timestamptz(6)
+  languagePref       LanguagePref @default(en) @map("language_pref")
+  isActive           Boolean      @default(true) @map("is_active")
+  inviteToken        String?      @map("invite_token") @db.VarChar(255)
+  inviteTokenExpires DateTime?    @map("invite_token_expires") @db.Timestamptz(6)
+  createdAt          DateTime     @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime     @map("updated_at") @db.Timestamptz(6)
 
   recipes         Recipe[]       @relation("UserRecipes")
   comments        Comment[]      @relation("UserComments")
   favorites       Favorite[]     @relation("UserFavorites")
   
   invitedBy   User?  @relation("Invitations", fields: [invitedById], references: [id])
-  invitedById Int?   @map("invitedBy")
+  invitedById Int?   @map("invited_by")
   invites     User[] @relation("Invitations")
 
   @@map("users")
@@ -59,28 +59,28 @@ model User {
 
 model Comment {
   id        Int      @id @default(autoincrement())
-  content   String   @map("content")
-  createdAt DateTime @map("createdAt") @db.Timestamptz(6)
-  updatedAt DateTime @map("updatedAt") @db.Timestamptz(6)
+  content   String   @map("comment_text")
+  createdAt DateTime @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
 
   author   User   @relation("UserComments", fields: [authorId], references: [id])
-  authorId Int    @map("userId")
+  authorId Int    @map("user_id")
   recipe   Recipe @relation("RecipeComments", fields: [recipeId], references: [id])
-  recipeId Int    @map("recipeId")
+  recipeId Int    @map("recipe_id")
 
   @@map("comments")
 }
 
 model Favorite {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @map("createdAt") @db.Timestamptz(6)
+  createdAt DateTime @map("created_at") @db.Timestamptz(6)
 
   user     User   @relation("UserFavorites", fields: [userId], references: [id])
-  userId   Int    @map("userId")
+  userId   Int    @map("user_id")
   recipe   Recipe @relation("RecipeFavorites", fields: [recipeId], references: [id])
-  recipeId Int    @map("recipeId")
+  recipeId Int    @map("recipe_id")
 
-  @@unique([userId, recipeId])
+  @@unique([recipeId, userId])
   @@map("favorites")
 }
 
@@ -110,3 +110,4 @@ enum Role {
   viewer
   @@map("enum_users_role")
 }
+

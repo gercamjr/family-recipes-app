@@ -1,29 +1,32 @@
 # Frontend Dockerfile for development
 FROM node:20-alpine
 
-# Set working directory
-WORKDIR /app/frontend
+# Set working directory for the entire monorepo
+WORKDIR /app
 
-# Copy package files
-COPY package-lock.json ./package-lock.json
-COPY frontend/package.json ./package.json
+# Copy root package files and workspace package.json files
+COPY package.json ./
+COPY package-lock.json ./
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
 
-# Install dependencies
+# Install all monorepo dependencies
+# This installs dependencies for all workspaces (frontend, backend)
 RUN npm ci
 
-# Copy source code
-COPY frontend/ ./
+# Copy the rest of the frontend source code
+COPY frontend/ ./frontend/
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Set the working directory to the frontend app
+WORKDIR /app/frontend
 
-# Change ownership of the app directory
-RUN chown -R nextjs:nodejs /app/frontend
+# Create and switch to a non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# Expose port
+# Expose the port for the frontend development server
 EXPOSE 5173
 
-# Start the development server
+# Start the frontend development server
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

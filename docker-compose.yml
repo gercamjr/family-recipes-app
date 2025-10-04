@@ -45,7 +45,7 @@ services:
         condition: service_healthy
     networks:
       - family-recipes-network
-    command: npm run dev
+    command: npm run dev:seed
 
   # Frontend Development Server
   frontend:
@@ -55,9 +55,6 @@ services:
     container_name: family-recipes-frontend
     env_file:
       - ./frontend/.env
-    environment:
-      # Override API URL to use the backend service hostname in Docker
-      VITE_API_BASE_URL: http://backend:5001/api
     ports:
       - "5173:5173"
     volumes:
