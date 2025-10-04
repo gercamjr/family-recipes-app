@@ -6,6 +6,8 @@ import { store } from './store'
 import App from './App'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
+import RecipeForm from './components/recipes/RecipeForm'
+import RecipeDetail from './components/recipes/RecipeDetail'
 import './i18n'
 import './index.css'
 
@@ -53,6 +55,30 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             }
           />
           <Route
+            path='/recipes/new'
+            element={
+              <ProtectedRoute>
+                <RecipeForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/recipes/:id/edit'
+            element={
+              <ProtectedRoute>
+                <RecipeForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/recipes/:id'
+            element={
+              <ProtectedRoute>
+                <RecipeDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path='/'
             element={
               <ProtectedRoute>
@@ -66,3 +92,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </Provider>
   </React.StrictMode>
 )
+
+if ('serviceWorker' in navigator) {
+  // Use the window load event to keep the page load performant
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+  })
+}

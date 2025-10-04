@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { fetchRecipes, updateFilters, clearFilters, deleteRecipe, toggleFavorite } from '../../store/recipesThunks'
+import { useNavigate } from 'react-router-dom'
 import RecipeCard from './RecipeCard'
 
 const RecipeList = () => {
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const { recipes, loading, error, pagination, filters } = useAppSelector((state) => state.recipes)
   const { language } = useAppSelector((state) => state.ui)
 
@@ -51,8 +53,7 @@ const RecipeList = () => {
   }
 
   const handleEditRecipe = (recipe) => {
-    // TODO: Navigate to edit form or open modal
-    console.log('Edit recipe:', recipe)
+    navigate(`/recipes/${recipe.id}/edit`)
   }
 
   const handleDeleteRecipe = async (recipe) => {
@@ -66,13 +67,11 @@ const RecipeList = () => {
   }
 
   const handleViewRecipe = (recipe) => {
-    // TODO: Navigate to recipe detail
-    console.log('View recipe:', recipe)
+    navigate(`/recipes/${recipe.id}`)
   }
 
   const handleAddRecipe = () => {
-    // TODO: Navigate to add recipe form
-    console.log('Add new recipe')
+    navigate('/recipes/new')
   }
 
   return (

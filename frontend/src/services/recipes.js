@@ -94,14 +94,14 @@ export const recipesService = {
   // Get comments for a recipe
   async getComments(recipeId) {
     try {
-      const response = await api.get(`/comments/${recipeId}`)
+      const response = await api.get(`/comments?recipeId=${recipeId}`)
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to fetch comments')
     }
   },
 
-  // Add comment to recipe
+  // Add a comment to a recipe
   async addComment(recipeId, commentText) {
     try {
       const response = await api.post('/comments', { recipeId, commentText })

@@ -68,6 +68,41 @@
     "noRecipes": "No recipes found",
     "noRecipesDesc": "Get started by adding your first recipe"
   },
+  "recipe": {
+    "form": {
+      "createTitle": "Create New Recipe",
+      "editTitle": "Edit Recipe",
+      "image": "Recipe Image",
+      "titleEn": "Title (English)",
+      "titleEs": "Title (Spanish)",
+      "ingredientsEn": "Ingredients (English)",
+      "ingredientsEs": "Ingredients (Spanish)",
+      "instructionsEn": "Instructions (English)",
+      "instructionsEs": "Instructions (Spanish)",
+      "prepTime": "Prep Time (minutes)",
+      "cookTime": "Cook Time (minutes)",
+      "servings": "Servings",
+      "categories": "Categories",
+      "tags": "Tags",
+      "addIngredient": "Add Ingredient",
+      "required": "This field is required",
+      "noPermission": "You don't have permission to edit this recipe"
+    },
+    "detail": {
+      "ingredients": "Ingredients",
+      "instructions": "Instructions",
+      "share": "Share Recipe",
+      "print": "Print",
+      "downloadPdf": "Download PDF",
+      "email": "Email",
+      "copyLink": "Copy Link",
+      "comments": "Comments",
+      "addComment": "Add a comment...",
+      "postComment": "Post Comment",
+      "notFound": "Recipe not found",
+      "noComments": "No comments yet"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

@@ -83,3 +83,26 @@ export const updateFilters = createAsyncThunk('recipes/updateFilters', async (ne
     return rejectWithValue(error.message)
   }
 })
+
+// Fetch comments for a recipe
+export const fetchComments = createAsyncThunk('recipes/fetchComments', async (recipeId, { rejectWithValue }) => {
+  try {
+    const response = await recipesService.getComments(recipeId)
+    return { recipeId, comments: response }
+  } catch (error) {
+    return rejectWithValue(error.message)
+  }
+})
+
+// Add a comment to a recipe
+export const addComment = createAsyncThunk(
+  'recipes/addComment',
+  async ({ recipeId, commentText }, { rejectWithValue }) => {
+    try {
+      const response = await recipesService.addComment(recipeId, commentText)
+      return response
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
