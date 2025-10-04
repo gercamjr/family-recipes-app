@@ -1,101 +1,73 @@
 const express = require('express')
-const { body, validationResult, query } = require('express-validator')
 const { authenticateToken, optionalAuth } = require('../middleware/auth')
 const { formatRecipeResponse } = require('../utils/auth')
+const { validate, validateQuery, recipeSchema, recipeUpdateSchema, searchQuerySchema } = require('../utils/validation')
 const prisma = require('../lib/prisma')
 const router = express.Router()
-
-// Validation middleware
-const validateRecipe = [
-  body('titleEn').notEmpty().trim(),
-  body('ingredientsEn').isArray({ min: 1 }),
-  body('instructionsEn').notEmpty().trim(),
-  body('titleEs').optional().trim(),
-  body('ingredientsEs').optional().isArray(),
-  body('instructionsEs').optional().trim(),
-  body('prepTime').optional().isInt({ min: 0 }),
-  body('cookTime').optional().isInt({ min: 0 }),
-  body('servings').optional().isInt({ min: 1 }),
-  body('tags').optional().isArray(),
-  body('categories').optional().isArray(),
-  body('isPublic').optional().isBoolean(),
-]
 
 // @route   GET /api/recipes
 // @desc    Get all recipes with optional search
 // @access  Public (for public recipes)
-router.get(
-  '/',
-  optionalAuth,
-  [
-    query('search').optional().trim(),
-    query('category').optional().trim(),
-    query('tag').optional().trim(),
-    query('language').optional().isIn(['en', 'es']),
-    query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 50 }),
-  ],
-  async (req, res) => {
-    try {
-      const { search, category, tag, language = req.user?.languagePref || 'en', page = 1, limit = 20 } = req.query
+router.get('/', optionalAuth, validateQuery(searchQuerySchema), async (req, res) => {
+  try {
+    const { search, category, tag, language = req.user?.languagePref || 'en', page = 1, limit = 20 } = req.query
 
-      const skip = (page - 1) * limit
-      const whereClause = { isPublic: true }
+    const skip = (page - 1) * limit
+    const whereClause = { isPublic: true }
 
-      // Add search conditions
-      if (search) {
-        const searchFields = language === 'es' ? ['titleEs', 'instructionsEs'] : ['titleEn', 'instructionsEn']
+    // Add search conditions
+    if (search) {
+      const searchFields = language === 'es' ? ['titleEs', 'instructionsEs'] : ['titleEn', 'instructionsEn']
 
-        whereClause.OR = searchFields.map((field) => ({
-          [field]: {
-            contains: search,
-            mode: 'insensitive',
-          },
-        }))
-      }
-
-      if (category) {
-        whereClause.categories = { has: category }
-      }
-
-      if (tag) {
-        whereClause.tags = { has: tag }
-      }
-
-      const recipes = await prisma.recipe.findMany({
-        where: whereClause,
-        include: {
-          author: {
-            select: { id: true, email: true },
-          },
-          _count: {
-            select: { comments: true, favorites: true },
-          },
+      whereClause.OR = searchFields.map((field) => ({
+        [field]: {
+          contains: search,
+          mode: 'insensitive',
         },
-        orderBy: { createdAt: 'desc' },
-        take: parseInt(limit),
-        skip: skip,
-      })
-
-      const totalRecipes = await prisma.recipe.count({ where: whereClause })
-
-      const formattedRecipes = recipes.map((recipe) => formatRecipeResponse(recipe, language))
-
-      res.json({
-        recipes: formattedRecipes,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: totalRecipes,
-          pages: Math.ceil(totalRecipes / limit),
-        },
-      })
-    } catch (error) {
-      console.error('Get recipes error:', error)
-      res.status(500).json({ error: 'Failed to fetch recipes' })
+      }))
     }
+
+    if (category) {
+      whereClause.categories = { has: category }
+    }
+
+    if (tag) {
+      whereClause.tags = { has: tag }
+    }
+
+    const recipes = await prisma.recipe.findMany({
+      where: whereClause,
+      include: {
+        author: {
+          select: { id: true, email: true },
+        },
+        _count: {
+          select: { comments: true, favorites: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: parseInt(limit),
+      skip: skip,
+    })
+
+    const totalRecipes = await prisma.recipe.count({ where: whereClause })
+
+    const formattedRecipes = recipes.map((recipe) => formatRecipeResponse(recipe, language))
+
+    res.json({
+      recipes: formattedRecipes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: totalRecipes,
+        pages: Math.ceil(totalRecipes / limit),
+      },
+    })
+  } catch (error) {
+    console.error('Get recipes error:', error)
+    res.status(500).json({ error: 'Failed to fetch recipes' })
   }
-)
+})
 
 // @route   GET /api/recipes/my
 // @desc    Get user's own recipes
@@ -168,13 +140,8 @@ router.get('/:id', optionalAuth, async (req, res) => {
 // @route   POST /api/recipes
 // @desc    Create new recipe
 // @access  Private
-router.post('/', authenticateToken, validateRecipe, async (req, res) => {
+router.post('/', authenticateToken, validate(recipeSchema), async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
     const { titleEn, ingredientsEn, instructionsEn, ...rest } = req.body
 
     const recipeData = {
@@ -209,13 +176,8 @@ router.post('/', authenticateToken, validateRecipe, async (req, res) => {
 // @route   PUT /api/recipes/:id
 // @desc    Update recipe
 // @access  Private (owner or editor/admin)
-router.put('/:id', authenticateToken, validateRecipe, async (req, res) => {
+router.put('/:id', authenticateToken, validate(recipeUpdateSchema), async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
     const recipeId = parseInt(req.params.id)
     const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } })
     if (!recipe) {
