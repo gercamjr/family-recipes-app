@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../services/api'
 
 const RecipeForm = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { id } = useParams()
@@ -21,6 +21,7 @@ const RecipeForm = () => {
 
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(recipe?.image_url || '')
+  const [recipeLanguage, setRecipeLanguage] = useState(user?.languagePref || i18n?.language || 'en')
 
   const {
     register,
@@ -31,12 +32,9 @@ const RecipeForm = () => {
     reset,
   } = useForm({
     defaultValues: {
-      title_en: '',
-      title_es: '',
-      ingredients_en: [{ value: '' }],
-      ingredients_es: [{ value: '' }],
-      instructions_en: '',
-      instructions_es: '',
+      title: '',
+      ingredients: [{ value: '' }],
+      instructions: '',
       prep_time: '',
       cook_time: '',
       servings: 1,
@@ -46,16 +44,10 @@ const RecipeForm = () => {
   })
 
   const {
-    fields: ingredientsEnFields,
-    append: appendEn,
-    remove: removeEn,
-  } = useFieldArray({ control, name: 'ingredients_en' })
-
-  const {
-    fields: ingredientsEsFields,
-    append: appendEs,
-    remove: removeEs,
-  } = useFieldArray({ control, name: 'ingredients_es' })
+    fields: ingredientsFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({ control, name: 'ingredients' })
 
   const availableTags = ['Quick', 'Easy', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Spicy', 'Healthy']
   const availableCategories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack', 'Beverage']
@@ -68,22 +60,38 @@ const RecipeForm = () => {
 
   useEffect(() => {
     if (isEdit && recipe) {
+      // Determine which language data to load based on user preference or available data
+      const lang = user?.languagePref || i18n?.language || 'en'
+      const hasEnglish = recipe.title_en
+      const hasSpanish = recipe.title_es
+
+      // Load the preferred language if available, otherwise fall back
+      let loadLanguage = lang
+      if (lang === 'en' && !hasEnglish && hasSpanish) {
+        loadLanguage = 'es'
+      } else if (lang === 'es' && !hasSpanish && hasEnglish) {
+        loadLanguage = 'en'
+      }
+
+      setRecipeLanguage(loadLanguage)
+
+      const title = loadLanguage === 'en' ? recipe.title_en : recipe.title_es
+      const ingredients = loadLanguage === 'en' ? recipe.ingredients_en : recipe.ingredients_es
+      const instructions = loadLanguage === 'en' ? recipe.instructions_en : recipe.instructions_es
+
       reset({
-        title_en: recipe.title_en,
-        title_es: recipe.title_es,
-        ingredients_en: recipe.ingredients_en?.map((i) => ({ value: i })) || [{ value: '' }],
-        ingredients_es: recipe.ingredients_es?.map((i) => ({ value: i })) || [{ value: '' }],
-        instructions_en: recipe.instructions_en,
-        instructions_es: recipe.instructions_es,
+        title: title || '',
+        ingredients: ingredients?.map((i) => ({ value: i })) || [{ value: '' }],
+        instructions: instructions || '',
         prep_time: recipe.prep_time,
         cook_time: recipe.cook_time,
         servings: recipe.servings,
         tags: recipe.tags,
-        category: recipe.category,
+        category: recipe.categories?.[0] || '',
       })
       setImagePreview(recipe.image_url)
     }
-  }, [isEdit, recipe, reset])
+  }, [isEdit, recipe, reset, user, i18n?.language])
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -109,11 +117,25 @@ const RecipeForm = () => {
         imageUrl = uploadResponse.data.url
       }
 
+      // Map the single language fields to the appropriate language-specific fields
       const recipeData = {
-        ...data,
         image_url: imageUrl,
-        ingredients_en: data.ingredients_en.map((i) => i.value).filter(Boolean),
-        ingredients_es: data.ingredients_es.map((i) => i.value).filter(Boolean),
+        prep_time: data.prep_time,
+        cook_time: data.cook_time,
+        servings: data.servings,
+        tags: data.tags,
+        categories: data.category ? [data.category] : [],
+      }
+
+      // Add language-specific fields
+      if (recipeLanguage === 'en') {
+        recipeData.titleEn = data.title
+        recipeData.ingredientsEn = data.ingredients.map((i) => i.value).filter(Boolean)
+        recipeData.instructionsEn = data.instructions
+      } else {
+        recipeData.titleEs = data.title
+        recipeData.ingredientsEs = data.ingredients.map((i) => i.value).filter(Boolean)
+        recipeData.instructionsEs = data.instructions
       }
 
       if (isEdit) {
@@ -137,11 +159,41 @@ const RecipeForm = () => {
   }
 
   return (
-    <div className='max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-2xl'>
+    <div className='max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-2xl my-8'>
       <h1 className='text-4xl font-bold text-space-cadet mb-8'>
         {isEdit ? t('recipes.editRecipe') : t('recipes.createRecipe')}
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
+        {/* Language Selector */}
+        <div>
+          <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.recipeLanguage')}</label>
+          <div className='flex gap-4'>
+            <label className='flex items-center space-x-2 cursor-pointer'>
+              <input
+                type='radio'
+                value='en'
+                checked={recipeLanguage === 'en'}
+                onChange={(e) => setRecipeLanguage(e.target.value)}
+                className='h-5 w-5 text-cerulean focus:ring-papaya'
+                disabled={!canEdit}
+              />
+              <span className='text-gray-700 font-medium'>English</span>
+            </label>
+            <label className='flex items-center space-x-2 cursor-pointer'>
+              <input
+                type='radio'
+                value='es'
+                checked={recipeLanguage === 'es'}
+                onChange={(e) => setRecipeLanguage(e.target.value)}
+                className='h-5 w-5 text-cerulean focus:ring-papaya'
+                disabled={!canEdit}
+              />
+              <span className='text-gray-700 font-medium'>Español</span>
+            </label>
+          </div>
+          <p className='text-sm text-gray-500 mt-2'>{t('recipes.languageHelp')}</p>
+        </div>
+
         {/* Image Upload */}
         <div>
           <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.image')}</label>
@@ -177,67 +229,37 @@ const RecipeForm = () => {
           </div>
         </div>
 
-        {/* Titles */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <InputField
-            label={t('recipes.titleEn')}
-            name='title_en'
-            register={register}
-            errors={errors}
-            required
-            disabled={!canEdit}
-          />
-          <InputField
-            label={t('recipes.titleEs')}
-            name='title_es'
-            register={register}
-            errors={errors}
-            required
-            disabled={!canEdit}
-          />
-        </div>
+        {/* Title */}
+        <InputField
+          label={t('recipes.title')}
+          name='title'
+          register={register}
+          errors={errors}
+          required
+          disabled={!canEdit}
+          t={t}
+        />
 
         {/* Ingredients */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-12'>
-          <DynamicFieldArray
-            label={t('recipes.ingredientsEn')}
-            name='ingredients_en'
-            fields={ingredientsEnFields}
-            append={appendEn}
-            remove={removeEn}
-            register={register}
-            canEdit={canEdit}
-            t={t}
-          />
-          <DynamicFieldArray
-            label={t('recipes.ingredientsEs')}
-            name='ingredients_es'
-            fields={ingredientsEsFields}
-            append={appendEs}
-            remove={removeEs}
-            register={register}
-            canEdit={canEdit}
-            t={t}
-          />
-        </div>
+        <DynamicFieldArray
+          label={t('recipes.ingredients')}
+          name='ingredients'
+          fields={ingredientsFields}
+          append={appendIngredient}
+          remove={removeIngredient}
+          register={register}
+          canEdit={canEdit}
+          t={t}
+        />
 
         {/* Instructions */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <TextareaField
-            label={t('recipes.instructionsEn')}
-            name='instructions_en'
-            register={register}
-            errors={errors}
-            disabled={!canEdit}
-          />
-          <TextareaField
-            label={t('recipes.instructionsEs')}
-            name='instructions_es'
-            register={register}
-            errors={errors}
-            disabled={!canEdit}
-          />
-        </div>
+        <TextareaField
+          label={t('recipes.instructions')}
+          name='instructions'
+          register={register}
+          errors={errors}
+          disabled={!canEdit}
+        />
 
         {/* Meta */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
@@ -248,6 +270,7 @@ const RecipeForm = () => {
             register={register}
             errors={errors}
             disabled={!canEdit}
+            t={t}
           />
           <InputField
             label={t('recipes.cookTime')}
@@ -256,6 +279,7 @@ const RecipeForm = () => {
             register={register}
             errors={errors}
             disabled={!canEdit}
+            t={t}
           />
           <InputField
             label={t('recipes.servings')}
@@ -264,6 +288,7 @@ const RecipeForm = () => {
             register={register}
             errors={errors}
             disabled={!canEdit}
+            t={t}
           />
         </div>
 
@@ -313,7 +338,7 @@ const RecipeForm = () => {
 
 // Helper components for form fields
 
-const InputField = ({ label, name, type = 'text', register, errors, required, disabled }) => (
+const InputField = ({ label, name, type = 'text', register, errors, required, disabled, t }) => (
   <div>
     <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
     <input

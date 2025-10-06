@@ -103,8 +103,10 @@ describe('RecipeForm', () => {
     })
 
     expect(screen.getByText('recipes.createRecipe')).toBeInTheDocument()
-    expect(screen.getByText('recipes.titleEn')).toBeInTheDocument()
-    expect(screen.getByText('recipes.titleEs')).toBeInTheDocument()
+    expect(screen.getByText('recipes.title')).toBeInTheDocument()
+    expect(screen.getByText('recipes.recipeLanguage')).toBeInTheDocument()
+    expect(screen.getByText('English')).toBeInTheDocument()
+    expect(screen.getByText('Español')).toBeInTheDocument()
   })
 
   it('renders edit form when recipe is provided', () => {

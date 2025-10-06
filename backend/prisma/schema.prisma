@@ -9,11 +9,11 @@ datasource db {
 
 model Recipe {
   id             Int      @id @default(autoincrement())
-  titleEn        String   @map("title_en") @db.VarChar(255)
+  titleEn        String?  @map("title_en") @db.VarChar(255)
   titleEs        String?  @map("title_es") @db.VarChar(255)
-  ingredientsEn  Json     @map("ingredients_en") @db.Json
+  ingredientsEn  Json?    @map("ingredients_en") @db.Json
   ingredientsEs  Json?    @map("ingredients_es") @db.Json
-  instructionsEn String   @map("instructions_en")
+  instructionsEn String?  @map("instructions_en")
   instructionsEs String?  @map("instructions_es")
   prepTime       Int?     @map("prep_time")
   cookTime       Int?     @map("cook_time")

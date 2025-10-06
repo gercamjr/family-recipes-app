@@ -9,6 +9,7 @@
     "register": "Registrarse"
   },
   "auth": {
+    "logout": "Cerrar Sesión",
     "login": {
       "title": "Iniciar Sesión",
       "email": "Correo Electrónico",
@@ -53,20 +54,51 @@
     "recipeImage": "Imagen de Receta",
     "addRecipe": "Agregar Receta",
     "editRecipe": "Editar Receta",
+    "createRecipe": "Crear Nueva Receta",
     "deleteRecipe": "Eliminar Receta",
     "search": "Buscar",
+    "searchPlaceholder": "Buscar recetas...",
     "filter": "Filtrar",
     "categories": "Categorías",
     "tags": "Etiquetas",
+    "title": "Título de la Receta",
     "ingredients": "Ingredientes",
+    "ingredientsEn": "Ingredientes (Inglés)",
+    "ingredientsEs": "Ingredientes (Español)",
     "instructions": "Instrucciones",
-    "prepTime": "Tiempo de preparación",
-    "cookTime": "Tiempo de cocción",
+    "instructionsEn": "Instrucciones (Inglés)",
+    "instructionsEs": "Instrucciones (Español)",
+    "prepTime": "Tiempo de Preparación (minutos)",
+    "cookTime": "Tiempo de Cocción (minutos)",
     "servings": "Porciones",
     "save": "Guardar",
     "cancel": "Cancelar",
     "noRecipes": "No se encontraron recetas",
-    "noRecipesDesc": "Comienza agregando tu primera receta"
+    "noRecipesDesc": "Comienza agregando tu primera receta",
+    "image": "Imagen de Receta",
+    "titleEn": "Título (Inglés)",
+    "titleEs": "Título (Español)",
+    "category": "Categoría",
+    "recipeLanguage": "Idioma de la Receta",
+    "languageHelp": "Elige el idioma para esta receta. Puedes agregar traducciones más tarde."
+  },
+  "categories": {
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena",
+    "dessert": "Postre",
+    "snack": "Merienda",
+    "beverage": "Bebida"
+  },
+  "tags": {
+    "quick": "Rápido",
+    "easy": "Fácil",
+    "vegetarian": "Vegetariano",
+    "vegan": "Vegano",
+    "gluten-free": "Sin Gluten",
+    "dairy-free": "Sin Lácteos",
+    "spicy": "Picante",
+    "healthy": "Saludable"
   },
   "recipe": {
     "form": {
@@ -104,6 +136,7 @@
     }
   },
   "common": {
+    "familyRecipes": "Recetas Familiares",
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
@@ -116,7 +149,17 @@
     "previous": "Anterior",
     "view": "Ver",
     "page": "Página",
-    "of": "de"
+    "of": "de",
+    "search": "Buscar",
+    "clear": "Limpiar",
+    "uploadFile": "Subir Archivo",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "required": "Este campo es obligatorio",
+    "unauthorized": "No tienes permiso para realizar esta acción",
+    "add": "Agregar",
+    "selectOption": "Selecciona una opción..."
   },
   "validation": {
     "required": "Este campo es obligatorio",

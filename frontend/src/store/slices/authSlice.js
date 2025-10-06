@@ -1,9 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+// Initialize state from localStorage
+const token = localStorage.getItem('token')
+const user = localStorage.getItem('user')
+
 const initialState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
+  user: user ? JSON.parse(user) : null,
+  token: token || null,
+  isAuthenticated: !!token,
   loading: false,
   error: null,
 }
@@ -22,6 +26,9 @@ const authSlice = createSlice({
       state.user = action.payload.user
       state.token = action.payload.token
       state.error = null
+      // Persist to localStorage
+      localStorage.setItem('token', action.payload.token)
+      localStorage.setItem('user', JSON.stringify(action.payload.user))
     },
     loginFailure: (state, action) => {
       state.loading = false
@@ -29,6 +36,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.user = null
       state.token = null
+      // Clear localStorage
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
     },
     registerStart: (state) => {
       state.loading = true
@@ -40,6 +50,9 @@ const authSlice = createSlice({
       state.user = action.payload.user
       state.token = action.payload.token
       state.error = null
+      // Persist to localStorage
+      localStorage.setItem('token', action.payload.token)
+      localStorage.setItem('user', JSON.stringify(action.payload.user))
     },
     registerFailure: (state, action) => {
       state.loading = false
@@ -47,6 +60,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.user = null
       state.token = null
+      // Clear localStorage
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
     },
     logout: (state) => {
       state.user = null
@@ -54,6 +70,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.loading = false
       state.error = null
+      // Clear localStorage
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
     },
     updateProfile: (state, action) => {
       state.user = { ...state.user, ...action.payload }

@@ -142,15 +142,22 @@ router.get('/:id', optionalAuth, async (req, res) => {
 // @access  Private
 router.post('/', authenticateToken, validate(recipeSchema), async (req, res) => {
   try {
-    const { titleEn, ingredientsEn, instructionsEn, ...rest } = req.body
+    const { titleEn, titleEs, ingredientsEn, ingredientsEs, instructionsEn, instructionsEs, ...rest } = req.body
 
     const recipeData = {
-      titleEn,
-      ingredientsEn,
-      instructionsEn,
       ...rest,
       authorId: req.user.id,
     }
+
+    // Add English fields if provided
+    if (titleEn) recipeData.titleEn = titleEn
+    if (ingredientsEn) recipeData.ingredientsEn = ingredientsEn
+    if (instructionsEn) recipeData.instructionsEn = instructionsEn
+
+    // Add Spanish fields if provided
+    if (titleEs) recipeData.titleEs = titleEs
+    if (ingredientsEs) recipeData.ingredientsEs = ingredientsEs
+    if (instructionsEs) recipeData.instructionsEs = instructionsEs
 
     const recipe = await prisma.recipe.create({
       data: recipeData,
