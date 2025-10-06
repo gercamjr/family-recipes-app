@@ -102,9 +102,9 @@ describe('RecipeForm', () => {
       },
     })
 
-    expect(screen.getByText('recipe.form.createTitle')).toBeInTheDocument()
-    expect(screen.getByText('recipe.form.titleEn')).toBeInTheDocument()
-    expect(screen.getByText('recipe.form.titleEs')).toBeInTheDocument()
+    expect(screen.getByText('recipes.createRecipe')).toBeInTheDocument()
+    expect(screen.getByText('recipes.titleEn')).toBeInTheDocument()
+    expect(screen.getByText('recipes.titleEs')).toBeInTheDocument()
   })
 
   it('renders edit form when recipe is provided', () => {
@@ -113,7 +113,14 @@ describe('RecipeForm', () => {
       title_en: 'Test Recipe',
       title_es: 'Receta de Prueba',
       ingredients_en: ['Ingredient 1'],
+      ingredients_es: ['Ingrediente 1'],
       instructions_en: 'Test instructions',
+      instructions_es: 'Instrucciones de prueba',
+      prep_time: 10,
+      cook_time: 20,
+      servings: 4,
+      tags: [],
+      category: '',
       user_id: 1,
     }
 
@@ -138,7 +145,7 @@ describe('RecipeForm', () => {
       routeParams: { id: '1' },
     })
 
-    expect(screen.getByText('recipe.form.editTitle')).toBeInTheDocument()
+    expect(screen.getByText('recipes.editRecipe')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Test Recipe')).toBeInTheDocument()
   })
 
@@ -146,6 +153,16 @@ describe('RecipeForm', () => {
     const mockRecipe = {
       id: 1,
       title_en: 'Test Recipe',
+      title_es: 'Receta de Prueba',
+      ingredients_en: ['Ingredient 1'],
+      ingredients_es: ['Ingrediente 1'],
+      instructions_en: 'Test instructions',
+      instructions_es: 'Instrucciones de prueba',
+      prep_time: 10,
+      cook_time: 20,
+      servings: 4,
+      tags: [],
+      category: '',
       user_id: 2, // Different user
     }
 
@@ -170,6 +187,6 @@ describe('RecipeForm', () => {
       routeParams: { id: '1' },
     })
 
-    expect(screen.getByText('recipe.form.noPermission')).toBeInTheDocument()
+    expect(screen.getByText('common.unauthorized')).toBeInTheDocument()
   })
 })
