@@ -21,8 +21,8 @@ model Recipe {
   tags           String[] @default([])
   categories     String[] @default([])
   isPublic       Boolean  @default(true) @map("is_public")
-  createdAt      DateTime @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime @map("updated_at") @db.Timestamptz(6)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   author   User @relation("UserRecipes", fields: [authorId], references: [id])
   authorId Int  @map("user_id")
@@ -43,8 +43,8 @@ model User {
   isActive           Boolean      @default(true) @map("is_active")
   inviteToken        String?      @map("invite_token") @db.VarChar(255)
   inviteTokenExpires DateTime?    @map("invite_token_expires") @db.Timestamptz(6)
-  createdAt          DateTime     @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime     @map("updated_at") @db.Timestamptz(6)
+  createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   recipes         Recipe[]       @relation("UserRecipes")
   comments        Comment[]      @relation("UserComments")
@@ -60,8 +60,8 @@ model User {
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String   @map("comment_text")
-  createdAt DateTime @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   author   User   @relation("UserComments", fields: [authorId], references: [id])
   authorId Int    @map("user_id")
@@ -73,7 +73,7 @@ model Comment {
 
 model Favorite {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @map("created_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   user     User   @relation("UserFavorites", fields: [userId], references: [id])
   userId   Int    @map("user_id")

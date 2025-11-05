@@ -19,8 +19,9 @@ const RecipeForm = () => {
   const isOwner = recipe ? user?.id === recipe.user_id : true
   const canEdit = !isEdit || (isEdit && isOwner)
 
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(recipe?.image_url || '')
+  const [mediaFiles, setMediaFiles] = useState([]) // Array of File objects
+  const [mediaPreviews, setMediaPreviews] = useState([]) // Array of preview URLs
+  const [uploadedMedia, setUploadedMedia] = useState([]) // Array of uploaded media metadata
   const [recipeLanguage, setRecipeLanguage] = useState(user?.languagePref || i18n?.language || 'en')
 
   const {
@@ -89,37 +90,56 @@ const RecipeForm = () => {
         tags: recipe.tags,
         category: recipe.categories?.[0] || '',
       })
-      setImagePreview(recipe.image_url)
+
+      // Load existing media
+      if (recipe.media && recipe.media.length > 0) {
+        setUploadedMedia(recipe.media)
+        setMediaPreviews(recipe.media.map((m) => m.url))
+      }
     }
   }, [isEdit, recipe, reset, user, i18n?.language])
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setImageFile(file)
-      const reader = new FileReader()
-      reader.onload = () => setImagePreview(reader.result)
-      reader.readAsDataURL(file)
+    const files = Array.from(e.target.files)
+    if (files.length > 0) {
+      setMediaFiles((prev) => [...prev, ...files])
+
+      // Create previews for new files
+      files.forEach((file) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          setMediaPreviews((prev) => [...prev, reader.result])
+        }
+        reader.readAsDataURL(file)
+      })
     }
+  }
+
+  const removeMedia = (index) => {
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index))
+    setMediaPreviews((prev) => prev.filter((_, i) => i !== index))
+    setUploadedMedia((prev) => prev.filter((_, i) => i !== index))
   }
 
   const onSubmit = async (data) => {
     if (!canEdit) return
 
     try {
-      let imageUrl = recipe?.image_url || ''
-      if (imageFile) {
+      // Upload new media files
+      const mediaToSave = [...uploadedMedia] // Start with existing uploaded media
+
+      for (const file of mediaFiles) {
         const formData = new FormData()
-        formData.append('file', imageFile)
+        formData.append('file', file)
         const uploadResponse = await api.post('/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        imageUrl = uploadResponse.data.url
+        mediaToSave.push(uploadResponse.data)
       }
 
       // Map the single language fields to the appropriate language-specific fields
       const recipeData = {
-        image_url: imageUrl,
+        media: mediaToSave,
         prep_time: data.prep_time,
         cook_time: data.cook_time,
         servings: data.servings,
@@ -194,39 +214,56 @@ const RecipeForm = () => {
           <p className='text-sm text-gray-500 mt-2'>{t('recipes.languageHelp')}</p>
         </div>
 
-        {/* Image Upload */}
+        {/* Media Upload (Images/Videos) */}
         <div>
-          <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.image')}</label>
-          <div className='mt-2 flex items-center'>
-            {imagePreview ? (
-              <img src={imagePreview} alt='Recipe preview' className='w-48 h-48 object-cover rounded-lg shadow-md' />
-            ) : (
-              <div className='w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center'>
-                <svg className='w-16 h-16 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={1}
-                    d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+          <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.media')}</label>
+
+          {/* Media Previews */}
+          {mediaPreviews.length > 0 && (
+            <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mb-4'>
+              {mediaPreviews.map((preview, index) => (
+                <div key={index} className='relative group'>
+                  <img
+                    src={preview}
+                    alt={`Media ${index + 1}`}
+                    className='w-full h-32 object-cover rounded-lg shadow-md'
                   />
-                </svg>
-              </div>
-            )}
-            <label
-              htmlFor='file-upload'
-              className='ml-6 cursor-pointer bg-sunglow hover:bg-papaya text-space-cadet font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
-            >
-              <span>{t('common.uploadFile')}</span>
-              <input
-                id='file-upload'
-                name='file-upload'
-                type='file'
-                className='sr-only'
-                onChange={handleImageChange}
-                disabled={!canEdit}
-              />
-            </label>
-          </div>
+                  <button
+                    type='button'
+                    onClick={() => removeMedia(index)}
+                    className='absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity'
+                    disabled={!canEdit}
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Upload Button */}
+          <label
+            htmlFor='file-upload'
+            className='inline-flex cursor-pointer bg-sunglow hover:bg-papaya text-space-cadet font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
+          >
+            <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
+            </svg>
+            <span>{t('recipes.addMedia')}</span>
+            <input
+              id='file-upload'
+              name='file-upload'
+              type='file'
+              accept='image/*,video/*'
+              multiple
+              className='sr-only'
+              onChange={handleImageChange}
+              disabled={!canEdit}
+            />
+          </label>
+          <p className='text-sm text-gray-500 mt-2'>{t('recipes.mediaHelp')}</p>
         </div>
 
         {/* Title */}

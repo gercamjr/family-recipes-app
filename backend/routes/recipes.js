@@ -41,6 +41,7 @@ router.get('/', optionalAuth, validateQuery(searchQuerySchema), async (req, res)
         author: {
           select: { id: true, email: true },
         },
+        media: true,
         _count: {
           select: { comments: true, favorites: true },
         },
@@ -77,6 +78,7 @@ router.get('/my', authenticateToken, async (req, res) => {
     const recipes = await prisma.recipe.findMany({
       where: { authorId: req.user.id },
       include: {
+        media: true,
         _count: {
           select: { comments: true, favorites: true },
         },
@@ -104,6 +106,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
         author: {
           select: { id: true, email: true },
         },
+        media: true,
         comments: {
           include: {
             author: {
@@ -142,12 +145,28 @@ router.get('/:id', optionalAuth, async (req, res) => {
 // @access  Private
 router.post('/', authenticateToken, validate(recipeSchema), async (req, res) => {
   try {
-    const { titleEn, titleEs, ingredientsEn, ingredientsEs, instructionsEn, instructionsEs, ...rest } = req.body
+    const {
+      titleEn,
+      titleEs,
+      ingredientsEn,
+      ingredientsEs,
+      instructionsEn,
+      instructionsEs,
+      image_url, // Deprecated - kept for backwards compatibility
+      media, // Array of media objects from upload
+      prep_time,
+      cook_time,
+      ...rest
+    } = req.body
 
     const recipeData = {
       ...rest,
       authorId: req.user.id,
     }
+
+    // Add time fields if provided (convert from snake_case)
+    if (prep_time !== undefined) recipeData.prepTime = prep_time
+    if (cook_time !== undefined) recipeData.cookTime = cook_time
 
     // Add English fields if provided
     if (titleEn) recipeData.titleEn = titleEn
@@ -159,12 +178,36 @@ router.post('/', authenticateToken, validate(recipeSchema), async (req, res) => 
     if (ingredientsEs) recipeData.ingredientsEs = ingredientsEs
     if (instructionsEs) recipeData.instructionsEs = instructionsEs
 
+    // Create recipe with media if provided
     const recipe = await prisma.recipe.create({
-      data: recipeData,
+      data: {
+        ...recipeData,
+        // Create associated media records
+        media: {
+          create:
+            media?.map((m) => ({
+              url: m.url,
+              type: m.type,
+              filename: m.filename,
+              size: m.size,
+              mimeType: m.mimeType,
+            })) ||
+            (image_url
+              ? [
+                  {
+                    url: image_url,
+                    type: 'image',
+                    filename: 'recipe-image',
+                  },
+                ]
+              : []),
+        },
+      },
       include: {
         author: {
           select: { id: true, email: true },
         },
+        media: true,
       },
     })
 
@@ -198,13 +241,59 @@ router.put('/:id', authenticateToken, validate(recipeUpdateSchema), async (req, 
       return res.status(403).json({ error: 'Access denied' })
     }
 
+    const {
+      titleEn,
+      titleEs,
+      ingredientsEn,
+      ingredientsEs,
+      instructionsEn,
+      instructionsEs,
+      media,
+      prep_time,
+      cook_time,
+      ...rest
+    } = req.body
+
+    const updateData = { ...rest }
+
+    // Add time fields if provided
+    if (prep_time !== undefined) updateData.prepTime = prep_time
+    if (cook_time !== undefined) updateData.cookTime = cook_time
+
+    // Add language fields if provided
+    if (titleEn !== undefined) updateData.titleEn = titleEn
+    if (titleEs !== undefined) updateData.titleEs = titleEs
+    if (ingredientsEn !== undefined) updateData.ingredientsEn = ingredientsEn
+    if (ingredientsEs !== undefined) updateData.ingredientsEs = ingredientsEs
+    if (instructionsEn !== undefined) updateData.instructionsEn = instructionsEn
+    if (instructionsEs !== undefined) updateData.instructionsEs = instructionsEs
+
+    // Handle media updates
+    if (media !== undefined) {
+      // Delete existing media and create new ones
+      await prisma.media.deleteMany({
+        where: { recipeId },
+      })
+
+      updateData.media = {
+        create: media.map((m) => ({
+          url: m.url,
+          type: m.type,
+          filename: m.filename,
+          size: m.size,
+          mimeType: m.mimeType,
+        })),
+      }
+    }
+
     const updatedRecipe = await prisma.recipe.update({
       where: { id: recipeId },
-      data: req.body,
+      data: updateData,
       include: {
         author: {
           select: { id: true, email: true },
         },
+        media: true,
       },
     })
 

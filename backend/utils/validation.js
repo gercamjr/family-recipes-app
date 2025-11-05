@@ -27,8 +27,22 @@ const recipeSchema = z
     ingredientsEs: z.array(z.string()).min(1, 'At least one Spanish ingredient is required').optional(),
     instructionsEn: z.string().min(1, 'English instructions are required').optional(),
     instructionsEs: z.string().min(1, 'Spanish instructions are required').optional(),
+    image_url: z.string().url().optional(), // Deprecated - for backwards compatibility
+    media: z
+      .array(
+        z.object({
+          url: z.string().url(),
+          type: z.enum(['image', 'video']),
+          filename: z.string().optional(),
+          size: z.number().optional(),
+          mimeType: z.string().optional(),
+        })
+      )
+      .optional(),
     prepTime: z.number().int().min(0).optional(),
+    prep_time: z.union([z.number(), z.string().transform(Number)]).optional(),
     cookTime: z.number().int().min(0).optional(),
+    cook_time: z.union([z.number(), z.string().transform(Number)]).optional(),
     servings: z.number().int().min(1).optional(),
     tags: z.array(z.string()).optional(),
     categories: z.array(z.string()).optional(),

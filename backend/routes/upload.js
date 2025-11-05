@@ -33,6 +33,51 @@ const upload = multer({
   },
 })
 
+// @route   POST /api/upload
+// @desc    Upload image/video and return URL (for recipe form before recipe creation)
+// @access  Private
+router.post('/', authenticateToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' })
+    }
+
+    // Upload to Cloudinary
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'family-recipes',
+        transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
+        resource_type: 'auto', // Auto-detect image or video
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload error:', error)
+          return res.status(500).json({ error: 'Failed to upload file' })
+        }
+
+        const isVideo = result.resource_type === 'video'
+        const mediaType = isVideo ? 'video' : 'image'
+
+        res.status(200).json({
+          url: result.secure_url,
+          publicId: result.public_id,
+          type: mediaType,
+          filename: req.file.originalname,
+          size: req.file.size,
+          mimeType: req.file.mimetype,
+        })
+      }
+    )
+
+    // Pipe the buffer to Cloudinary
+    const bufferStream = require('stream').Readable.from(req.file.buffer)
+    bufferStream.pipe(uploadStream)
+  } catch (error) {
+    console.error('Upload error:', error)
+    res.status(500).json({ error: 'Failed to upload file' })
+  }
+})
+
 // @route   POST /api/upload/:recipeId
 // @desc    Upload media for a recipe
 // @access  Private (recipe owner or editor/admin)
