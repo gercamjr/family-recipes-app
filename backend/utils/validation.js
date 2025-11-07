@@ -46,7 +46,7 @@ const recipeSchema = z
     servings: z.union([z.number().int().min(1), z.string().transform(Number)]).optional(),
     tags: z.array(z.string()).optional(),
     categories: z.array(z.string()).optional(),
-    isPublic: z.boolean().optional().default(false),
+    isPublic: z.boolean().optional().default(true),
   })
   .refine(
     (data) => {

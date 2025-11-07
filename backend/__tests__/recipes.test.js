@@ -187,6 +187,7 @@ describe('Recipes API', () => {
           ingredientsEn: newRecipeData.ingredientsEn,
           instructionsEn: newRecipeData.instructionsEn,
           authorId: user.id,
+          isPublic: true,
           media: {
             create: [],
           },
