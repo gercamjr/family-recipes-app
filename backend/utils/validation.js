@@ -43,7 +43,7 @@ const recipeSchema = z
     prep_time: z.union([z.number(), z.string().transform(Number)]).optional(),
     cookTime: z.number().int().min(0).optional(),
     cook_time: z.union([z.number(), z.string().transform(Number)]).optional(),
-    servings: z.number().int().min(1).optional(),
+    servings: z.union([z.number().int().min(1), z.string().transform(Number)]).optional(),
     tags: z.array(z.string()).optional(),
     categories: z.array(z.string()).optional(),
     isPublic: z.boolean().optional().default(false),
@@ -86,7 +86,7 @@ const emailShareSchema = z.object({
 // Validation middleware
 const validate = (schema) => (req, res, next) => {
   try {
-    schema.parse(req.body)
+    req.body = schema.parse(req.body)
     next()
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -105,7 +105,7 @@ const validate = (schema) => (req, res, next) => {
 
 const validateQuery = (schema) => (req, res, next) => {
   try {
-    schema.parse(req.query)
+    req.query = schema.parse(req.query)
     next()
   } catch (error) {
     if (error instanceof z.ZodError) {
