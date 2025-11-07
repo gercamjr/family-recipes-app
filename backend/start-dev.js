@@ -25,6 +25,32 @@ async function checkNeedsSeeding() {
   }
 }
 
+async function runMigrate() {
+  console.log('🔄 Running database migrations...')
+
+  return new Promise((resolve, reject) => {
+    const migrateProcess = spawn('npx', ['prisma', 'migrate', 'dev'], {
+      stdio: 'inherit',
+      cwd: process.cwd(),
+    })
+
+    migrateProcess.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ Database migrations completed')
+        resolve()
+      } else {
+        console.error('❌ Database migrations failed')
+        reject(new Error(`Migrate script exited with code ${code}`))
+      }
+    })
+
+    migrateProcess.on('error', (error) => {
+      console.error('❌ Error running migrate script:', error)
+      reject(error)
+    })
+  })
+}
+
 async function runSeed() {
   console.log('🌱 Database appears empty, running seed script...')
 
@@ -75,6 +101,9 @@ async function main() {
     // Wait a bit for database to be ready
     console.log('⏳ Checking database status...')
     await new Promise((resolve) => setTimeout(resolve, 3000))
+
+    // Run migrations first
+    await runMigrate()
 
     const needsSeeding = await checkNeedsSeeding()
 
