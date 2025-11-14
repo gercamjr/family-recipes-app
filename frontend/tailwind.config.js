@@ -1,17 +1,16 @@
-import { colors } from './src/theme/colors'
-
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        papaya: colors.papaya,
-        sunglow: colors.sunglow,
-        'sea-green': colors.seaGreen,
-        cerulean: colors.cerulean,
-        'space-cadet': colors.spaceCadet,
-        'off-white': colors.offWhite,
+        papaya: '#F06449',
+        sunglow: '#FFD166',
+        seaGreen: '#06D6A0',
+        cerulean: '#118AB2',
+        spaceCadet: '#073B4C',
+        offWhite: '#FDF0D5',
       },
     },
   },

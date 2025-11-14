@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-off-white text-space-cadet;
+  @apply bg-offWhite text-spaceCadet;
 }
