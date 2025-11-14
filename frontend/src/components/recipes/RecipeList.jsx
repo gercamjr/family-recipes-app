@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import RecipeCard from './RecipeCard'
 
 const RecipeList = () => {
+  console.log('RecipeList component rendered')
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -20,8 +21,13 @@ const RecipeList = () => {
   const availableTags = ['Quick', 'Easy', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Spicy', 'Healthy']
 
   useEffect(() => {
+    console.log('RecipeList: Fetching recipes with filters:', { ...filters, language })
     dispatch(fetchRecipes({ ...filters, language }))
   }, [dispatch, filters, language])
+
+  useEffect(() => {
+    console.log('RecipeList: Redux state changed:', { recipes: recipes.length, loading, error, pagination })
+  }, [recipes, loading, error, pagination])
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -159,16 +165,21 @@ const RecipeList = () => {
       {error && <p className='text-red-500'>{error}</p>}
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-        {recipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            onEdit={() => handleEditRecipe(recipe)}
-            onDelete={() => handleDeleteRecipe(recipe)}
-            onView={() => handleViewRecipe(recipe)}
-            onToggleFavorite={() => dispatch(toggleFavorite(recipe.id))}
-          />
-        ))}
+        {console.log('Rendering recipes:', recipes)}
+        {recipes && recipes.length > 0 ? (
+          recipes.map((recipe) => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              onEdit={() => handleEditRecipe(recipe)}
+              onDelete={() => handleDeleteRecipe(recipe)}
+              onView={() => handleViewRecipe(recipe)}
+              onToggleFavorite={() => dispatch(toggleFavorite(recipe.id))}
+            />
+          ))
+        ) : (
+          <p className='col-span-full text-center text-gray-500'>No recipes found</p>
+        )}
       </div>
 
       {pagination.totalPages > 1 && (

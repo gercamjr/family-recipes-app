@@ -10,7 +10,7 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
   const isFavorite = favorites.some((fav) => fav.id === recipe.id)
   const isOwner = user?.id === recipe.user_id
 
-  const title = language === 'es' ? recipe.title_es : recipe.title_en
+  const title = recipe.title
 
   const handleFavoriteToggle = (e) => {
     e.stopPropagation()
@@ -40,11 +40,11 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
     >
       <div className='relative'>
         <img
-          src={recipe.image_url || 'https://via.placeholder.com/400x300'}
+          src={recipe.image_url || 'https://placehold.co//400x300'}
           alt={title}
           className='w-full h-56 object-cover'
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/400x300'
+            e.target.src = 'https://placehold.co/400x300'
           }}
         />
         <button
@@ -69,11 +69,11 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
       <div className='p-5'>
         <h3 className='text-2xl font-bold text-space-cadet mb-2 truncate'>{title}</h3>
         <div className='flex items-center text-sm text-gray-500 mb-4'>
-          <svg className='w-5 h-5 mr-1 text-sunglow' fill='currentColor' viewBox='0 0 20 20'>
+          {/* <svg className='w-5 h-5 mr-1 text-sunglow' fill='currentColor' viewBox='0 0 20 20'>
             <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.965a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.965c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.965a1 1 0 00-.364-1.118L2.24 9.392c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.95-.69l1.286-3.965z' />
-          </svg>
-          <span>{recipe.rating_avg || 'N/A'}</span>
-          <span className='mx-2'>·</span>
+          </svg> */}
+          {/* <span>{recipe.rating_avg || 'N/A'}</span>
+          <span className='mx-2'>·</span> */}
           <span>{recipe.category}</span>
         </div>
         {recipe.tags && recipe.tags.length > 0 && (
