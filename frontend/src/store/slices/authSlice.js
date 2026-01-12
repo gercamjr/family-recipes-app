@@ -6,8 +6,7 @@ const user = localStorage.getItem('user')
 
 const initialState = {
   user: user ? JSON.parse(user) : null,
-  token: token || null,
-  isAuthenticated: !!token,
+  isAuthenticated: !!user,
   loading: false,
   error: null,
 }
@@ -24,10 +23,8 @@ const authSlice = createSlice({
       state.loading = false
       state.isAuthenticated = true
       state.user = action.payload.user
-      state.token = action.payload.token
       state.error = null
       // Persist to localStorage
-      localStorage.setItem('token', action.payload.token)
       localStorage.setItem('user', JSON.stringify(action.payload.user))
     },
     loginFailure: (state, action) => {
@@ -35,9 +32,7 @@ const authSlice = createSlice({
       state.error = action.payload
       state.isAuthenticated = false
       state.user = null
-      state.token = null
       // Clear localStorage
-      localStorage.removeItem('token')
       localStorage.removeItem('user')
     },
     registerStart: (state) => {
@@ -48,10 +43,8 @@ const authSlice = createSlice({
       state.loading = false
       state.isAuthenticated = true
       state.user = action.payload.user
-      state.token = action.payload.token
       state.error = null
       // Persist to localStorage
-      localStorage.setItem('token', action.payload.token)
       localStorage.setItem('user', JSON.stringify(action.payload.user))
     },
     registerFailure: (state, action) => {
@@ -59,19 +52,15 @@ const authSlice = createSlice({
       state.error = action.payload
       state.isAuthenticated = false
       state.user = null
-      state.token = null
       // Clear localStorage
-      localStorage.removeItem('token')
       localStorage.removeItem('user')
     },
     logout: (state) => {
       state.user = null
-      state.token = null
       state.isAuthenticated = false
       state.loading = false
       state.error = null
       // Clear localStorage
-      localStorage.removeItem('token')
       localStorage.removeItem('user')
     },
     updateProfile: (state, action) => {

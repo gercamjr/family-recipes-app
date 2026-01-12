@@ -218,6 +218,47 @@ const RecipeForm = () => {
         <div>
           <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.media')}</label>
 
+          {/* Drag and Drop Area */}
+          <div
+            onDrop={(e) => {
+              e.preventDefault()
+              if (!canEdit) return
+              const files = Array.from(e.dataTransfer.files)
+              handleImageChange({ target: { files } })
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            className='border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center cursor-pointer hover:border-papaya transition-colors'
+          >
+            <svg className='mx-auto w-12 h-12 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+              />
+            </svg>
+            <p className='mt-2 text-sm text-gray-600'>{t('recipes.dragDropHelp')}</p>
+            <label
+              htmlFor='file-upload'
+              className='mt-2 inline-flex cursor-pointer bg-sunglow hover:bg-papaya text-space-cadet font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
+            >
+              <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
+              </svg>
+              <span>{t('recipes.addMedia')}</span>
+              <input
+                id='file-upload'
+                name='file-upload'
+                type='file'
+                accept='image/*,video/*'
+                multiple
+                className='sr-only'
+                onChange={handleImageChange}
+                disabled={!canEdit}
+              />
+            </label>
+          </div>
+
           {/* Media Previews */}
           {mediaPreviews.length > 0 && (
             <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mb-4'>
@@ -243,26 +284,6 @@ const RecipeForm = () => {
             </div>
           )}
 
-          {/* Upload Button */}
-          <label
-            htmlFor='file-upload'
-            className='inline-flex cursor-pointer bg-sunglow hover:bg-papaya text-space-cadet font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
-          >
-            <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
-            </svg>
-            <span>{t('recipes.addMedia')}</span>
-            <input
-              id='file-upload'
-              name='file-upload'
-              type='file'
-              accept='image/*,video/*'
-              multiple
-              className='sr-only'
-              onChange={handleImageChange}
-              disabled={!canEdit}
-            />
-          </label>
           <p className='text-sm text-gray-500 mt-2'>{t('recipes.mediaHelp')}</p>
         </div>
 
