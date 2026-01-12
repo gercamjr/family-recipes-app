@@ -72,9 +72,15 @@ router.post(
       // Generate JWT
       const token = generateToken(user)
 
+      res.cookie('jwt', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      })
+
       res.status(201).json({
         message: 'User registered successfully',
-        token,
         user: {
           id: user.id,
           email: user.email,
@@ -112,9 +118,15 @@ router.post('/login', validate(loginSchema), async (req, res) => {
     // Generate token
     const token = generateToken(user)
 
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    })
+
     res.json({
       message: 'Login successful',
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -196,6 +208,14 @@ router.get('/me', authenticateToken, async (req, res) => {
       createdAt: req.user.createdAt,
     },
   })
+})
+
+// @route   POST /api/auth/logout
+// @desc    Logout user
+// @access  Private
+router.post('/logout', (req, res) => {
+  res.clearCookie('jwt')
+  res.json({ message: 'Logged out successfully' })
 })
 
 module.exports = router

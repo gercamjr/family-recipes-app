@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
+const cookieParser = require('cookie-parser')
 require('dotenv').config()
 
 const app = express()
@@ -29,6 +30,7 @@ app.use('/api/', limiter)
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+app.use(cookieParser())
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

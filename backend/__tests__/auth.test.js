@@ -80,7 +80,6 @@ describe('Auth Routes', () => {
       })
 
       expect(res.statusCode).toEqual(201)
-      expect(res.body).toHaveProperty('token')
       expect(res.body.user).toEqual({
         id: newUser.id,
         email: newUser.email,
@@ -161,7 +160,6 @@ describe('Auth Routes', () => {
       })
 
       expect(res.statusCode).toEqual(200)
-      expect(res.body).toHaveProperty('token')
       expect(res.body).toHaveProperty('message', 'Login successful')
       expect(res.body.user).toEqual({
         id: user.id,
@@ -317,6 +315,17 @@ describe('Auth Routes', () => {
         ...adminUser,
         inviteToken: 'generated-token',
         inviteTokenExpires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      describe('POST /api/auth/logout', () => {
+        it('should clear the JWT cookie and return success message', async () => {
+          const res = await request(app).post('/api/auth/logout')
+      
+          expect(res.statusCode).toEqual(200)
+          expect(res.body).toHaveProperty('message', 'Logged out successfully')
+          expect(res.header['set-cookie']).toBeDefined()
+          expect(res.header['set-cookie'][0]).toMatch(/jwt=; Max-Age=0/)
+        })
+      })
+      
       })
 
       const res = await request(app).post('/api/auth/invite').set('Authorization', `Bearer ${token}`).send({
