@@ -10,7 +10,7 @@ const router = express.Router()
 // @access  Public (for public recipes)
 router.get('/', optionalAuth, validateQuery(searchQuerySchema), async (req, res) => {
   try {
-    const { search, category, tag, language = req.user?.languagePref || 'en', page = 1, limit = 20 } = req.query
+    const { search, category, tags, language = req.user?.languagePref || 'en', page = 1, limit = 20 } = req.query
 
     const skip = (page - 1) * limit
     const whereClause = { isPublic: true }
@@ -31,8 +31,9 @@ router.get('/', optionalAuth, validateQuery(searchQuerySchema), async (req, res)
       whereClause.categories = { has: category }
     }
 
-    if (tag) {
-      whereClause.tags = { has: tag }
+    if (tags) {
+      const tagsArray = Array.isArray(tags) ? tags : [tags]
+      whereClause.tags = { hasSome: tagsArray }
     }
 
     const recipes = await prisma.recipe.findMany({

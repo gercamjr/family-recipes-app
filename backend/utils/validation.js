@@ -71,10 +71,16 @@ const commentSchema = z.object({
 const searchQuerySchema = z.object({
   search: z.string().optional(),
   category: z.string().optional(),
-  tag: z.string().optional(),
+  tags: z.union([z.string(), z.array(z.string())]).optional(),
   language: z.enum(['en', 'es']).optional(),
-  page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(50).optional(),
+  page: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .optional(),
+  limit: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .optional(),
 })
 
 // Email sharing validation

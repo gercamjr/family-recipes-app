@@ -68,22 +68,6 @@ export const toggleFavorite = createAsyncThunk(
   }
 )
 
-export const clearFilters = createAsyncThunk('recipes/clearFilters', async (_, { rejectWithValue }) => {
-  try {
-    return {}
-  } catch (error) {
-    return rejectWithValue(error.message)
-  }
-})
-
-export const updateFilters = createAsyncThunk('recipes/updateFilters', async (newFilters, { rejectWithValue }) => {
-  try {
-    return newFilters
-  } catch (error) {
-    return rejectWithValue(error.message)
-  }
-})
-
 // Fetch comments for a recipe
 export const fetchComments = createAsyncThunk('recipes/fetchComments', async (recipeId, { rejectWithValue }) => {
   try {
