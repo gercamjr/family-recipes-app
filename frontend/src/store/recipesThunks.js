@@ -88,7 +88,7 @@ export const updateFilters = createAsyncThunk('recipes/updateFilters', async (ne
 export const fetchComments = createAsyncThunk('recipes/fetchComments', async (recipeId, { rejectWithValue }) => {
   try {
     const response = await recipesService.getComments(recipeId)
-    return { recipeId, comments: response }
+    return { recipeId, comments: response.comments }
   } catch (error) {
     return rejectWithValue(error.message)
   }

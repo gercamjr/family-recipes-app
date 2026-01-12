@@ -40,9 +40,9 @@ const formatRecipeResponse = (recipe, language = 'en') => {
 
   return {
     id: recipe.id,
-    title: recipe[langFields.title] || recipe.titleEn,
-    ingredients: recipe[langFields.ingredients] || recipe.ingredientsEn,
-    instructions: recipe[langFields.instructions] || recipe.instructionsEn,
+    title: recipe[langFields.title] || recipe.titleEs || recipe.titleEn,
+    ingredients: recipe[langFields.ingredients] || recipe.ingredientsEs || recipe.ingredientsEn,
+    instructions: recipe[langFields.instructions] || recipe.instructionsEs || recipe.instructionsEn,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
     servings: recipe.servings,
