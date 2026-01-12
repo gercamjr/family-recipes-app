@@ -488,7 +488,7 @@ const DynamicFieldArray = ({ label, name, fields, append, remove, register, canE
       <button
         type='button'
         onClick={() => append({ value: '' })}
-        className='mt-4 bg-sea-green hover:bg-cerulean text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
+        className='mt-4 bg-seaGreen hover:bg-cerulean text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
       >
         {t('common.add')}
       </button>
