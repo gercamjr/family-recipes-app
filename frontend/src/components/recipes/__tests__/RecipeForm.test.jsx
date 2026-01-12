@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -8,13 +8,16 @@ import authSlice from '../../../store/slices/authSlice'
 import recipesSlice from '../../../store/slices/recipesSlice'
 import uiSlice from '../../../store/slices/uiSlice'
 import i18nMiddleware from '../../../store/middleware/i18nMiddleware'
+import api from '../../../services/api'
 
 // Mock the api service
 vi.mock('../../../services/api', () => ({
-  post: vi.fn(),
-  get: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
+  default: {
+    post: vi.fn(),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
 }))
 
 // Mock react-i18next
@@ -109,7 +112,7 @@ describe('RecipeForm', () => {
     expect(screen.getByText('Español')).toBeInTheDocument()
   })
 
-  it('renders edit form when recipe is provided', () => {
+  it('renders edit form when recipe is provided', async () => {
     const mockRecipe = {
       id: 1,
       title_en: 'Test Recipe',
@@ -123,8 +126,10 @@ describe('RecipeForm', () => {
       servings: 4,
       tags: [],
       category: '',
-      user_id: 1,
+      author: { id: 1 },
     }
+
+    api.get.mockResolvedValue({ data: { recipe: mockRecipe } })
 
     const { store } = renderWithProviders(<RecipeForm />, {
       preloadedState: {
@@ -147,11 +152,13 @@ describe('RecipeForm', () => {
       routeParams: { id: '1' },
     })
 
-    expect(screen.getByText('recipes.editRecipe')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('recipes.editRecipe')).toBeInTheDocument()
+    })
     expect(screen.getByDisplayValue('Test Recipe')).toBeInTheDocument()
   })
 
-  it('shows permission error for non-owner', () => {
+  it('shows permission error for non-owner', async () => {
     const mockRecipe = {
       id: 1,
       title_en: 'Test Recipe',
@@ -165,8 +172,10 @@ describe('RecipeForm', () => {
       servings: 4,
       tags: [],
       category: '',
-      user_id: 2, // Different user
+      author: { id: 2 }, // Different user
     }
+
+    api.get.mockResolvedValue({ data: { recipe: mockRecipe } })
 
     const { store } = renderWithProviders(<RecipeForm />, {
       preloadedState: {
@@ -189,6 +198,8 @@ describe('RecipeForm', () => {
       routeParams: { id: '1' },
     })
 
-    expect(screen.getByText('common.unauthorized')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('common.unauthorized')).toBeInTheDocument()
+    })
   })
 })

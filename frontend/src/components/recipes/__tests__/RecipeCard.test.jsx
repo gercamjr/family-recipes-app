@@ -40,7 +40,8 @@ const createMockStore = (initialState) => {
 
 const mockRecipe = {
   id: 1,
-  user_id: 1,
+  author: { id: 1 },
+  title: 'Test Recipe',
   title_en: 'Test Recipe',
   title_es: 'Receta de Prueba',
   ingredients_en: ['ingredient 1', 'ingredient 2'],
@@ -87,7 +88,8 @@ describe('RecipeCard', () => {
   })
 
   it('renders recipe title in Spanish', () => {
-    renderWithProviders(<RecipeCard recipe={mockRecipe} />, {
+    const spanishRecipe = { ...mockRecipe, title: 'Receta de Prueba' }
+    renderWithProviders(<RecipeCard recipe={spanishRecipe} />, {
       ui: { language: 'es' },
     })
 

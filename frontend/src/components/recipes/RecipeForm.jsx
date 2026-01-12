@@ -16,7 +16,7 @@ const RecipeForm = () => {
 
   const isEdit = !!id
   const recipe = currentRecipe
-  const isOwner = recipe ? user?.id === recipe.user_id : true
+  const isOwner = recipe ? user?.id === recipe.author?.id : true
   const canEdit = !isEdit || (isEdit && isOwner)
 
   const [mediaFiles, setMediaFiles] = useState([]) // Array of File objects

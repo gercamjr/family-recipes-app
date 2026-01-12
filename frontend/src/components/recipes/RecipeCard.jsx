@@ -8,7 +8,7 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
   const { user } = useAppSelector((state) => state.auth)
 
   const isFavorite = favorites.some((fav) => fav.id === recipe.id)
-  const isOwner = user?.id === recipe.user_id
+  const isOwner = user?.id === recipe.author?.id
 
   const title = recipe.title
 
