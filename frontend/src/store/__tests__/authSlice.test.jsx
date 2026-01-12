@@ -10,7 +10,6 @@ import authReducer, {
 describe('authSlice', () => {
   const initialState = {
     user: null,
-    token: null,
     isAuthenticated: false,
     loading: false,
     error: null,
@@ -33,7 +32,6 @@ describe('authSlice', () => {
     expect(actual.loading).toEqual(false)
     expect(actual.isAuthenticated).toEqual(true)
     expect(actual.user).toEqual(user)
-    expect(actual.token).toEqual(token)
     expect(actual.error).toEqual(null)
   })
 
@@ -44,13 +42,11 @@ describe('authSlice', () => {
     expect(actual.error).toEqual(error)
     expect(actual.isAuthenticated).toEqual(false)
     expect(actual.user).toEqual(null)
-    expect(actual.token).toEqual(null)
   })
 
   it('should handle logout', () => {
     const stateWithUser = {
       user: { id: 1, email: 'test@example.com' },
-      token: 'jwt-token',
       isAuthenticated: true,
       loading: false,
       error: null,
