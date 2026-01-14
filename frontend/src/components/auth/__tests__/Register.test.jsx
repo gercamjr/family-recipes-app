@@ -78,7 +78,7 @@ describe('Register', () => {
   })
 
   it('renders registration form correctly', () => {
-    const { store } = renderWithProviders(<Register />, {
+    renderWithProviders(<Register />, {
       preloadedState: {
         auth: {
           user: null,
@@ -103,7 +103,7 @@ describe('Register', () => {
   })
 
   it('shows validation errors for empty form submission', async () => {
-    const { store } = renderWithProviders(<Register />, {
+    renderWithProviders(<Register />, {
       preloadedState: {
         auth: {
           user: null,
@@ -143,7 +143,7 @@ describe('Register', () => {
   })
 
   it('shows validation error for short password', async () => {
-    const { store } = renderWithProviders(<Register />, {
+    renderWithProviders(<Register />, {
       preloadedState: {
         auth: {
           user: null,
@@ -178,7 +178,7 @@ describe('Register', () => {
   })
 
   it('shows validation error for password mismatch', async () => {
-    const { store } = renderWithProviders(<Register />, {
+    renderWithProviders(<Register />, {
       preloadedState: {
         auth: {
           user: null,
@@ -311,7 +311,7 @@ describe('Register', () => {
       () => new Promise((resolve) => setTimeout(() => resolve({ token: 'token', user: {} }), 100))
     )
 
-    const { store } = renderWithProviders(<Register />, {
+    renderWithProviders(<Register />, {
       preloadedState: {
         auth: {
           user: null,
@@ -404,7 +404,7 @@ describe('Register', () => {
   })
 
   it('toggles password visibility', () => {
-    const { store } = renderWithProviders(<Register />, {
+    renderWithProviders(<Register />, {
       preloadedState: {
         auth: {
           user: null,

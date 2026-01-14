@@ -125,7 +125,7 @@ const recipesSlice = createSlice({
         state.error = action.payload
       })
       // Toggle favorite
-      .addCase(toggleFavorite.pending, (state) => {
+      .addCase(toggleFavorite.pending, () => {
         // No loading state for favorite toggle
       })
       .addCase(toggleFavorite.fulfilled, (state, action) => {
@@ -137,7 +137,7 @@ const recipesSlice = createSlice({
           state.favorites = state.favorites.filter((f) => f.id !== recipeId)
         }
       })
-      .addCase(toggleFavorite.rejected, (state, action) => {
+      .addCase(toggleFavorite.rejected, () => {
         // Handle error if needed
       })
   },

@@ -1,7 +1,6 @@
 const request = require('supertest')
 const app = require('../server')
 const jwt = require('jsonwebtoken')
-const { mockDeep, mockReset } = require('jest-mock-extended')
 
 // Mock Prisma
 const prisma = require('../lib/prisma')
