@@ -1,30 +1,21 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { addToFavorites, removeFromFavorites } from '../../store/slices/recipesSlice'
+import { useAppSelector } from '../../store/hooks'
 
-const RecipeCard = ({ recipe, onEdit, onDelete, onView }) => {
+const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
   const { t } = useTranslation()
-  const dispatch = useAppDispatch()
   const { language } = useAppSelector((state) => state.ui)
   const { favorites } = useAppSelector((state) => state.recipes)
   const { user } = useAppSelector((state) => state.auth)
 
-  const [imageError, setImageError] = useState(false)
-
   const isFavorite = favorites.some((fav) => fav.id === recipe.id)
-  const isOwner = user?.id === recipe.user_id
+  const isOwner = user?.id === recipe.author?.id
 
-  const title = language === 'es' ? recipe.title_es : recipe.title_en
-  const ingredients = language === 'es' ? recipe.ingredients_es : recipe.ingredients_en
-  const instructions = language === 'es' ? recipe.instructions_es : recipe.instructions_en
+  const title = recipe.title
 
   const handleFavoriteToggle = (e) => {
     e.stopPropagation()
-    if (isFavorite) {
-      dispatch(removeFromFavorites(recipe.id))
-    } else {
-      dispatch(addToFavorites(recipe))
+    if (onToggleFavorite) {
+      onToggleFavorite(recipe.id)
     }
   }
 
@@ -44,39 +35,25 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView }) => {
 
   return (
     <div
-      className='bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer'
+      className='bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-all duration-300 cursor-pointer'
       onClick={handleView}
     >
-      {/* Recipe Image */}
-      <div className='h-48 bg-gray-200 dark:bg-gray-700 relative'>
-        {recipe.image_url && !imageError ? (
-          <img
-            src={recipe.image_url}
-            alt={title}
-            className='w-full h-full object-cover'
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className='w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500'>
-            <svg className='w-12 h-12' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
-              />
-            </svg>
-          </div>
-        )}
-
-        {/* Favorite Button */}
+      <div className='relative'>
+        <img
+          src={recipe.image_url || 'https://placehold.co//400x300'}
+          alt={title}
+          className='w-full h-56 object-cover'
+          onError={(e) => {
+            e.target.src = 'https://placehold.co/400x300'
+          }}
+        />
         <button
           onClick={handleFavoriteToggle}
-          className='absolute top-2 right-2 p-2 rounded-full bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow'
+          className='absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors'
         >
           <svg
-            className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-current' : 'text-gray-400'}`}
-            fill='none'
+            className={`w-6 h-6 ${isFavorite ? 'text-papaya' : 'text-gray-400'}`}
+            fill={isFavorite ? 'currentColor' : 'none'}
             stroke='currentColor'
             viewBox='0 0 24 24'
           >
@@ -89,90 +66,39 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView }) => {
           </svg>
         </button>
       </div>
-
-      {/* Recipe Content */}
-      <div className='p-4'>
-        <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2'>
-          {title || t('recipes.sampleRecipe')}
-        </h3>
-
-        {/* Recipe Meta */}
-        <div className='flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-3'>
-          <div className='flex items-center space-x-4'>
-            {recipe.prep_time && (
-              <span className='flex items-center'>
-                <svg className='w-4 h-4 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                  />
-                </svg>
-                {recipe.prep_time}min
-              </span>
-            )}
-            {recipe.servings && (
-              <span className='flex items-center'>
-                <svg className='w-4 h-4 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
-                  />
-                </svg>
-                {recipe.servings}
-              </span>
-            )}
-          </div>
+      <div className='p-5'>
+        <h3 className='text-2xl font-bold text-space-cadet mb-2 truncate'>{title}</h3>
+        <div className='flex items-center text-sm text-gray-500 mb-4'>
+          {/* <svg className='w-5 h-5 mr-1 text-sunglow' fill='currentColor' viewBox='0 0 20 20'>
+            <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.965a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.965c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.54-1.118l1.287-3.965a1 1 0 00-.364-1.118L2.24 9.392c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.95-.69l1.286-3.965z' />
+          </svg> */}
+          {/* <span>{recipe.rating_avg || 'N/A'}</span>
+          <span className='mx-2'>·</span> */}
+          <span>{recipe.category}</span>
         </div>
-
-        {/* Tags/Categories */}
         {recipe.tags && recipe.tags.length > 0 && (
-          <div className='flex flex-wrap gap-1 mb-3'>
-            {recipe.tags.slice(0, 3).map((tag, index) => (
-              <span
-                key={index}
-                className='px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full'
-              >
+          <div className='flex flex-wrap gap-2 mt-4'>
+            {recipe.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className='px-3 py-1 text-xs bg-sea-green text-white rounded-full'>
                 {tag}
               </span>
             ))}
-            {recipe.tags.length > 3 && (
-              <span className='px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full'>
-                +{recipe.tags.length - 3}
-              </span>
-            )}
           </div>
         )}
-
-        {/* Action Buttons */}
-        <div className='flex justify-between items-center'>
-          <div className='flex space-x-2'>
-            {isOwner && (
-              <>
-                <button
-                  onClick={handleEdit}
-                  className='px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
-                >
-                  {t('recipes.editRecipe')}
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className='px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors'
-                >
-                  {t('recipes.deleteRecipe')}
-                </button>
-              </>
-            )}
-          </div>
-          <button
-            onClick={handleView}
-            className='px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors'
-          >
-            {t('common.view')}
-          </button>
+        <div className='flex justify-end space-x-3 mt-4'>
+          {isOwner && (
+            <>
+              <button
+                onClick={handleEdit}
+                className='text-cerulean hover:text-sea-green font-semibold transition-colors'
+              >
+                {t('common.edit')}
+              </button>
+              <button onClick={handleDelete} className='text-papaya hover:text-red-700 font-semibold transition-colors'>
+                {t('common.delete')}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

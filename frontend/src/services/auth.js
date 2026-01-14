@@ -5,15 +5,14 @@ export const authService = {
   async login(credentials) {
     try {
       const response = await api.post('/auth/login', credentials)
-      const { token, user } = response.data
+      const { user } = response.data
 
-      // Store token and user data
-      localStorage.setItem('token', token)
+      // Store user data
       localStorage.setItem('user', JSON.stringify(user))
 
-      return { token, user }
+      return { user }
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Login failed')
+      throw new Error(error.response?.data?.error || 'Login failed')
     }
   },
 
@@ -23,7 +22,7 @@ export const authService = {
       const response = await api.post('/auth/register', userData)
       return response.data
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Registration failed')
+      throw new Error(error.response?.data?.error || 'Registration failed')
     }
   },
 
@@ -38,8 +37,12 @@ export const authService = {
   },
 
   // Logout user
-  logout() {
-    localStorage.removeItem('token')
+  async logout() {
+    try {
+      await api.post('/auth/logout')
+    } catch (error) {
+      // Ignore error
+    }
     localStorage.removeItem('user')
     window.location.href = '/login'
   },
@@ -52,7 +55,7 @@ export const authService = {
 
   // Check if user is authenticated
   isAuthenticated() {
-    return !!localStorage.getItem('token')
+    return !!localStorage.getItem('user')
   },
 
   // Get user role

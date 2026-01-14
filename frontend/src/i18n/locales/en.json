@@ -9,6 +9,7 @@
     "register": "Register"
   },
   "auth": {
+    "logout": "Logout",
     "login": {
       "title": "Login",
       "email": "Email",
@@ -53,20 +54,54 @@
     "recipeImage": "Recipe Image",
     "addRecipe": "Add Recipe",
     "editRecipe": "Edit Recipe",
+    "createRecipe": "Create New Recipe",
     "deleteRecipe": "Delete Recipe",
     "search": "Search",
+    "searchPlaceholder": "Search recipes...",
     "filter": "Filter",
     "categories": "Categories",
     "tags": "Tags",
+    "title": "Recipe Title",
     "ingredients": "Ingredients",
+    "ingredientsEn": "Ingredients (English)",
+    "ingredientsEs": "Ingredients (Spanish)",
     "instructions": "Instructions",
-    "prepTime": "Prep Time",
-    "cookTime": "Cook Time",
+    "instructionsEn": "Instructions (English)",
+    "instructionsEs": "Instructions (Spanish)",
+    "prepTime": "Prep Time (minutes)",
+    "cookTime": "Cook Time (minutes)",
     "servings": "Servings",
     "save": "Save",
     "cancel": "Cancel",
     "noRecipes": "No recipes found",
-    "noRecipesDesc": "Get started by adding your first recipe"
+    "noRecipesDesc": "Get started by adding your first recipe",
+    "image": "Recipe Image",
+    "media": "Media (Images/Videos)",
+    "addMedia": "Add Media",
+    "mediaHelp": "You can add multiple images or videos for this recipe",
+    "titleEn": "Title (English)",
+    "titleEs": "Title (Spanish)",
+    "category": "Category",
+    "recipeLanguage": "Recipe Language",
+    "languageHelp": "Choose the language for this recipe. You can add translations later."
+  },
+  "categories": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "dessert": "Dessert",
+    "snack": "Snack",
+    "beverage": "Beverage"
+  },
+  "tags": {
+    "quick": "Quick",
+    "easy": "Easy",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "gluten-free": "Gluten-Free",
+    "dairy-free": "Dairy-Free",
+    "spicy": "Spicy",
+    "healthy": "Healthy"
   },
   "recipe": {
     "form": {
@@ -104,6 +139,7 @@
     }
   },
   "common": {
+    "familyRecipes": "Family Recipes",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -116,7 +152,17 @@
     "previous": "Previous",
     "view": "View",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "search": "Search",
+    "clear": "Clear",
+    "uploadFile": "Upload File",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "required": "This field is required",
+    "unauthorized": "You don't have permission to perform this action",
+    "add": "Add",
+    "selectOption": "Select an option..."
   },
   "validation": {
     "required": "This field is required",

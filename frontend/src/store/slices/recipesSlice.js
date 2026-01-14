@@ -1,4 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
+import {
+  fetchRecipes,
+  fetchRecipeById,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+  toggleFavorite,
+} from '../recipesThunks'
 
 const initialState = {
   recipes: [],
@@ -25,96 +33,6 @@ const recipesSlice = createSlice({
   name: 'recipes',
   initialState,
   reducers: {
-    fetchRecipesStart: (state) => {
-      state.loading = true
-      state.error = null
-    },
-    fetchRecipesSuccess: (state, action) => {
-      state.loading = false
-      state.recipes = action.payload.recipes
-      state.pagination = action.payload.pagination
-      state.error = null
-    },
-    fetchRecipesFailure: (state, action) => {
-      state.loading = false
-      state.error = action.payload
-    },
-    fetchRecipeByIdStart: (state) => {
-      state.loading = true
-      state.error = null
-    },
-    fetchRecipeByIdSuccess: (state, action) => {
-      state.loading = false
-      state.currentRecipe = action.payload
-      state.error = null
-    },
-    fetchRecipeByIdFailure: (state, action) => {
-      state.loading = false
-      state.error = action.payload
-    },
-    createRecipeStart: (state) => {
-      state.loading = true
-      state.error = null
-    },
-    createRecipeSuccess: (state, action) => {
-      state.loading = false
-      state.recipes.unshift(action.payload)
-      state.error = null
-    },
-    createRecipeFailure: (state, action) => {
-      state.loading = false
-      state.error = action.payload
-    },
-    updateRecipeStart: (state) => {
-      state.loading = true
-      state.error = null
-    },
-    updateRecipeSuccess: (state, action) => {
-      state.loading = false
-      const index = state.recipes.findIndex((recipe) => recipe.id === action.payload.id)
-      if (index !== -1) {
-        state.recipes[index] = action.payload
-      }
-      if (state.currentRecipe && state.currentRecipe.id === action.payload.id) {
-        state.currentRecipe = action.payload
-      }
-      state.error = null
-    },
-    updateRecipeFailure: (state, action) => {
-      state.loading = false
-      state.error = action.payload
-    },
-    deleteRecipeStart: (state) => {
-      state.loading = true
-      state.error = null
-    },
-    deleteRecipeSuccess: (state, action) => {
-      state.loading = false
-      state.recipes = state.recipes.filter((recipe) => recipe.id !== action.payload)
-      state.favorites = state.favorites.filter((recipe) => recipe.id !== action.payload)
-      if (state.currentRecipe && state.currentRecipe.id === action.payload) {
-        state.currentRecipe = null
-      }
-      state.error = null
-    },
-    deleteRecipeFailure: (state, action) => {
-      state.loading = false
-      state.error = action.payload
-    },
-    addToFavorites: (state, action) => {
-      if (!state.favorites.find((recipe) => recipe.id === action.payload.id)) {
-        state.favorites.push(action.payload)
-      }
-    },
-    removeFromFavorites: (state, action) => {
-      state.favorites = state.favorites.filter((recipe) => recipe.id !== action.payload)
-    },
-    setFavorites: (state, action) => {
-      state.favorites = action.payload
-    },
-    setSearchResults: (state, action) => {
-      state.searchResults = action.payload
-    },
     updateFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload }
     },
@@ -128,32 +46,103 @@ const recipesSlice = createSlice({
       state.currentRecipe = null
     },
   },
+  extraReducers: (builder) => {
+    builder
+      // Fetch recipes
+      .addCase(fetchRecipes.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchRecipes.fulfilled, (state, action) => {
+        state.loading = false
+        state.recipes = action.payload.recipes
+        state.pagination = action.payload.pagination
+        state.error = null
+      })
+      .addCase(fetchRecipes.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch recipe by ID
+      .addCase(fetchRecipeById.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchRecipeById.fulfilled, (state, action) => {
+        state.loading = false
+        state.currentRecipe = action.payload.recipe
+        state.error = null
+      })
+      .addCase(fetchRecipeById.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Create recipe
+      .addCase(createRecipe.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(createRecipe.fulfilled, (state, action) => {
+        state.loading = false
+        state.recipes.unshift(action.payload.recipe)
+        state.error = null
+      })
+      .addCase(createRecipe.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Update recipe
+      .addCase(updateRecipe.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateRecipe.fulfilled, (state, action) => {
+        state.loading = false
+        state.currentRecipe = action.payload.recipe
+        // Update the recipe in the recipes array if it exists
+        const index = state.recipes.findIndex((r) => r.id === action.payload.recipe.id)
+        if (index !== -1) {
+          state.recipes[index] = action.payload.recipe
+        }
+        state.error = null
+      })
+      .addCase(updateRecipe.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Delete recipe
+      .addCase(deleteRecipe.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteRecipe.fulfilled, (state, action) => {
+        state.loading = false
+        state.recipes = state.recipes.filter((r) => r.id !== action.payload)
+        state.error = null
+      })
+      .addCase(deleteRecipe.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Toggle favorite
+      .addCase(toggleFavorite.pending, () => {
+        // No loading state for favorite toggle
+      })
+      .addCase(toggleFavorite.fulfilled, (state, action) => {
+        const recipeId = action.payload.recipeId
+        const isFavorite = action.payload.isFavorite
+        if (isFavorite) {
+          state.favorites.push({ id: recipeId })
+        } else {
+          state.favorites = state.favorites.filter((f) => f.id !== recipeId)
+        }
+      })
+      .addCase(toggleFavorite.rejected, () => {
+        // Handle error if needed
+      })
+  },
 })
 
-export const {
-  fetchRecipesStart,
-  fetchRecipesSuccess,
-  fetchRecipesFailure,
-  fetchRecipeByIdStart,
-  fetchRecipeByIdSuccess,
-  fetchRecipeByIdFailure,
-  createRecipeStart,
-  createRecipeSuccess,
-  createRecipeFailure,
-  updateRecipeStart,
-  updateRecipeSuccess,
-  updateRecipeFailure,
-  deleteRecipeStart,
-  deleteRecipeSuccess,
-  deleteRecipeFailure,
-  addToFavorites,
-  removeFromFavorites,
-  setFavorites,
-  setSearchResults,
-  updateFilters,
-  clearFilters,
-  clearError,
-  resetCurrentRecipe,
-} = recipesSlice.actions
+export const { updateFilters, clearFilters, clearError, resetCurrentRecipe } = recipesSlice.actions
 
 export default recipesSlice.reducer

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { fetchRecipeById } from '../../store/recipesThunks'
-import { addToFavorites, removeFromFavorites } from '../../store/slices/recipesSlice'
+import { fetchRecipeById, toggleFavorite } from '../../store/recipesThunks'
 import { fetchComments, addComment } from '../../store/recipesThunks'
 import { useParams, useNavigate } from 'react-router-dom'
 import html2pdf from 'html2pdf.js'
@@ -40,19 +39,15 @@ const RecipeDetail = () => {
   }
 
   const isFavorite = favorites.some((fav) => fav.id === recipe?.id)
-  const isOwner = user?.id === recipe?.user_id
+  const isOwner = user?.id === recipe?.author?.id
 
-  const title = language === 'es' ? recipe?.title_es : recipe?.title_en
-  const ingredients = language === 'es' ? recipe?.ingredients_es : recipe?.ingredients_en
-  const instructions = language === 'es' ? recipe?.instructions_es : recipe?.instructions_en
+  const title = recipe?.title
+  const ingredients = recipe?.ingredients
+  const instructions = recipe?.instructions
 
   const handleFavoriteToggle = () => {
     if (!recipe) return
-    if (isFavorite) {
-      dispatch(removeFromFavorites(recipe.id))
-    } else {
-      dispatch(addToFavorites(recipe))
-    }
+    dispatch(toggleFavorite({ recipeId: recipe.id, isFavorite: !isFavorite }))
   }
 
   const handleEdit = () => {
@@ -109,14 +104,30 @@ const RecipeDetail = () => {
 
   return (
     <div className='max-w-4xl mx-auto p-6'>
+      <button
+        onClick={() => navigate('/')}
+        className='mb-6 flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors'
+      >
+        <svg
+          className='w-5 h-5 mr-2'
+          fill='none'
+          stroke='currentColor'
+          viewBox='0 0 24 24'
+          xmlns='http://www.w3.org/2000/svg'
+        >
+          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+        </svg>
+        {t('common.back')}
+      </button>
+
       <div id='recipe-content'>
         {/* Header */}
         <div className='flex justify-between items-start mb-6'>
           <div>
             <h1 className='text-4xl font-bold text-gray-900 dark:text-white mb-2'>{title}</h1>
             <div className='flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400'>
-              <span>Prep: {recipe.prep_time} min</span>
-              <span>Cook: {recipe.cook_time} min</span>
+              <span>Prep: {recipe.prepTime} min</span>
+              <span>Cook: {recipe.cookTime} min</span>
               <span>Servings: {recipe.servings}</span>
             </div>
           </div>
@@ -155,8 +166,12 @@ const RecipeDetail = () => {
         </div>
 
         {/* Image */}
-        {recipe.image_url && (
-          <img src={recipe.image_url} alt={title} className='w-full h-64 object-cover rounded-lg mb-6' />
+        {recipe.media?.find((m) => m.type === 'image')?.url && (
+          <img
+            src={recipe.media.find((m) => m.type === 'image').url}
+            alt={title}
+            className='w-full h-64 object-cover rounded-lg mb-6'
+          />
         )}
 
         {/* Tags and Categories */}
@@ -242,10 +257,10 @@ const RecipeDetail = () => {
               <div key={comment.id} className='bg-gray-50 dark:bg-gray-800 p-4 rounded-lg'>
                 <div className='flex justify-between items-start'>
                   <div>
-                    <p className='font-medium text-gray-900 dark:text-white'>{comment.user_name}</p>
-                    <p className='text-gray-700 dark:text-gray-300'>{comment.comment_text}</p>
+                    <p className='font-medium text-gray-900 dark:text-white'>{comment.author.email}</p>
+                    <p className='text-gray-700 dark:text-gray-300'>{comment.content}</p>
                   </div>
-                  <span className='text-sm text-gray-500'>{new Date(comment.created_at).toLocaleDateString()}</span>
+                  <span className='text-sm text-gray-500'>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             ))

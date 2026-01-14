@@ -7,300 +7,493 @@ import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../services/api'
 
 const RecipeForm = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { language } = useAppSelector((state) => state.ui)
   const { user } = useAppSelector((state) => state.auth)
   const { loading, currentRecipe } = useAppSelector((state) => state.recipes)
 
   const isEdit = !!id
   const recipe = currentRecipe
-  const isOwner = recipe ? user?.id === recipe.user_id : true
+  const isOwner = recipe ? user?.id === recipe.author?.id : true
   const canEdit = !isEdit || (isEdit && isOwner)
 
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(recipe?.image_url || '')
+  const [mediaFiles, setMediaFiles] = useState([]) // Array of File objects
+  const [mediaPreviews, setMediaPreviews] = useState([]) // Array of preview URLs
+  const [uploadedMedia, setUploadedMedia] = useState([]) // Array of uploaded media metadata
+  const [recipeLanguage, setRecipeLanguage] = useState(user?.languagePref || i18n?.language || 'en')
 
   const {
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
     formState: { errors },
     reset,
   } = useForm({
     defaultValues: {
-      title_en: recipe?.title_en || '',
-      title_es: recipe?.title_es || '',
-      ingredients_en: recipe?.ingredients_en || [''],
-      ingredients_es: recipe?.ingredients_es || [''],
-      instructions_en: recipe?.instructions_en || '',
-      instructions_es: recipe?.instructions_es || '',
-      prep_time: recipe?.prep_time || '',
-      cook_time: recipe?.cook_time || '',
-      servings: recipe?.servings || 1,
-      tags: recipe?.tags || [],
-      categories: recipe?.categories || [],
+      title: '',
+      ingredients: [{ value: '' }],
+      instructions: '',
+      prep_time: '',
+      cook_time: '',
+      servings: 1,
+      tags: [],
+      category: '',
     },
   })
 
   const {
-    fields: ingredientsEnFields,
-    append: appendEn,
-    remove: removeEn,
-  } = useFieldArray({
-    control,
-    name: 'ingredients_en',
-  })
-
-  const {
-    fields: ingredientsEsFields,
-    append: appendEs,
-    remove: removeEs,
-  } = useFieldArray({
-    control,
-    name: 'ingredients_es',
-  })
+    fields: ingredientsFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({ control, name: 'ingredients' })
 
   const availableTags = ['Quick', 'Easy', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Spicy', 'Healthy']
   const availableCategories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack', 'Beverage']
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setImageFile(file)
-      const reader = new FileReader()
-      reader.onload = () => setImagePreview(reader.result)
-      reader.readAsDataURL(file)
+  useEffect(() => {
+    if (isEdit) {
+      dispatch(fetchRecipeById(id))
     }
+  }, [dispatch, id, isEdit])
+
+  useEffect(() => {
+    if (isEdit && recipe) {
+      // Determine which language data to load based on user preference or available data
+      const lang = user?.languagePref || i18n?.language || 'en'
+      const hasEnglish = recipe.title_en
+      const hasSpanish = recipe.title_es
+
+      // Load the preferred language if available, otherwise fall back
+      let loadLanguage = lang
+      if (lang === 'en' && !hasEnglish && hasSpanish) {
+        loadLanguage = 'es'
+      } else if (lang === 'es' && !hasSpanish && hasEnglish) {
+        loadLanguage = 'en'
+      }
+
+      setRecipeLanguage(loadLanguage)
+
+      const title = loadLanguage === 'en' ? recipe.title_en : recipe.title_es
+      const ingredients = loadLanguage === 'en' ? recipe.ingredients_en : recipe.ingredients_es
+      const instructions = loadLanguage === 'en' ? recipe.instructions_en : recipe.instructions_es
+
+      reset({
+        title: title || '',
+        ingredients: ingredients?.map((i) => ({ value: i })) || [{ value: '' }],
+        instructions: instructions || '',
+        prep_time: recipe.prep_time,
+        cook_time: recipe.cook_time,
+        servings: recipe.servings,
+        tags: recipe.tags,
+        category: recipe.categories?.[0] || '',
+      })
+
+      // Load existing media
+      if (recipe.media && recipe.media.length > 0) {
+        setUploadedMedia(recipe.media)
+        setMediaPreviews(recipe.media.map((m) => m.url))
+      }
+    }
+  }, [isEdit, recipe, reset, user, i18n?.language])
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length > 0) {
+      setMediaFiles((prev) => [...prev, ...files])
+
+      // Create previews for new files
+      files.forEach((file) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          setMediaPreviews((prev) => [...prev, reader.result])
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  const removeMedia = (index) => {
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index))
+    setMediaPreviews((prev) => prev.filter((_, i) => i !== index))
+    setUploadedMedia((prev) => prev.filter((_, i) => i !== index))
   }
 
   const onSubmit = async (data) => {
     if (!canEdit) return
 
     try {
-      let imageUrl = recipe?.image_url || ''
-      if (imageFile) {
-        // Upload image to backend
+      // Upload new media files
+      const mediaToSave = [...uploadedMedia] // Start with existing uploaded media
+
+      for (const file of mediaFiles) {
         const formData = new FormData()
-        formData.append('file', imageFile)
+        formData.append('file', file)
         const uploadResponse = await api.post('/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        imageUrl = uploadResponse.data.url
+        mediaToSave.push(uploadResponse.data)
       }
 
+      // Map the single language fields to the appropriate language-specific fields
       const recipeData = {
-        ...data,
-        image_url: imageUrl,
-        ingredients_en: data.ingredients_en.filter((i) => i.trim()),
-        ingredients_es: data.ingredients_es.filter((i) => i.trim()),
+        media: mediaToSave,
+        prep_time: data.prep_time,
+        cook_time: data.cook_time,
+        servings: data.servings,
+        tags: data.tags,
+        categories: data.category ? [data.category] : [],
+      }
+
+      // Add language-specific fields
+      if (recipeLanguage === 'en') {
+        recipeData.titleEn = data.title
+        recipeData.ingredientsEn = data.ingredients.map((i) => i.value).filter(Boolean)
+        recipeData.instructionsEn = data.instructions
+      } else {
+        recipeData.titleEs = data.title
+        recipeData.ingredientsEs = data.ingredients.map((i) => i.value).filter(Boolean)
+        recipeData.instructionsEs = data.instructions
       }
 
       if (isEdit) {
-        await dispatch(updateRecipe({ id, data: recipeData })).unwrap()
+        await dispatch(updateRecipe({ id, ...recipeData })).unwrap()
+        navigate(`/recipes/${id}`)
       } else {
         await dispatch(createRecipe(recipeData)).unwrap()
+        navigate('/')
       }
-
-      navigate('/')
     } catch (error) {
-      console.error('Error saving recipe:', error)
+      console.error('Failed to save recipe:', error)
     }
   }
 
-  useEffect(() => {
-    if (isEdit && id) {
-      dispatch(fetchRecipeById(id))
-    }
-  }, [dispatch, id, isEdit])
-
-  useEffect(() => {
-    if (recipe) {
-      setImagePreview(recipe.image_url || '')
-      reset({
-        title_en: recipe.title_en,
-        title_es: recipe.title_es,
-        ingredients_en: recipe.ingredients_en,
-        ingredients_es: recipe.ingredients_es,
-        instructions_en: recipe.instructions_en,
-        instructions_es: recipe.instructions_es,
-        prep_time: recipe.prep_time,
-        cook_time: recipe.cook_time,
-        servings: recipe.servings,
-        tags: recipe.tags,
-        categories: recipe.categories,
-      })
-    }
-  }, [recipe, reset])
+  if (loading && isEdit) {
+    return <p>{t('common.loading')}</p>
+  }
 
   if (!canEdit) {
-    return (
-      <div className='p-4 text-center'>
-        <p className='text-red-500'>{t('recipe.form.noPermission')}</p>
-      </div>
-    )
+    return <p>{t('common.unauthorized')}</p>
   }
 
   return (
-    <div className='max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md'>
-      <h2 className='text-2xl font-bold mb-6'>{isEdit ? t('recipe.form.editTitle') : t('recipe.form.createTitle')}</h2>
-
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-        {/* Image Upload */}
+    <div className='max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-2xl my-8'>
+      <h1 className='text-4xl font-bold text-space-cadet mb-8'>
+        {isEdit ? t('recipes.editRecipe') : t('recipes.createRecipe')}
+      </h1>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
+        {/* Language Selector */}
         <div>
-          <label className='block text-sm font-medium mb-2'>{t('recipe.form.image')}</label>
-          <input
-            type='file'
-            accept='image/*'
-            onChange={handleImageChange}
-            className='block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
-          />
-          {imagePreview && <img src={imagePreview} alt='Preview' className='mt-2 max-w-xs h-auto rounded' />}
+          <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.recipeLanguage')}</label>
+          <div className='flex gap-4'>
+            <label className='flex items-center space-x-2 cursor-pointer'>
+              <input
+                type='radio'
+                value='en'
+                checked={recipeLanguage === 'en'}
+                onChange={(e) => setRecipeLanguage(e.target.value)}
+                className='h-5 w-5 text-cerulean focus:ring-papaya'
+                disabled={!canEdit}
+              />
+              <span className='text-gray-700 font-medium'>English</span>
+            </label>
+            <label className='flex items-center space-x-2 cursor-pointer'>
+              <input
+                type='radio'
+                value='es'
+                checked={recipeLanguage === 'es'}
+                onChange={(e) => setRecipeLanguage(e.target.value)}
+                className='h-5 w-5 text-cerulean focus:ring-papaya'
+                disabled={!canEdit}
+              />
+              <span className='text-gray-700 font-medium'>Español</span>
+            </label>
+          </div>
+          <p className='text-sm text-gray-500 mt-2'>{t('recipes.languageHelp')}</p>
         </div>
 
-        {/* Titles */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.titleEn')}</label>
-            <input
-              {...register('title_en', { required: t('recipe.form.required') })}
-              className='w-full p-2 border rounded'
-            />
-            {errors.title_en && <p className='text-red-500 text-sm'>{errors.title_en.message}</p>}
+        {/* Media Upload (Images/Videos) */}
+        <div>
+          <label className='block text-lg font-semibold text-space-cadet mb-2'>{t('recipes.media')}</label>
+
+          {/* Drag and Drop Area */}
+          <div
+            onDrop={(e) => {
+              e.preventDefault()
+              if (!canEdit) return
+              const files = Array.from(e.dataTransfer.files)
+              handleImageChange({ target: { files } })
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            className='border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center cursor-pointer hover:border-papaya transition-colors'
+          >
+            <svg className='mx-auto w-12 h-12 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+              />
+            </svg>
+            <p className='mt-2 text-sm text-gray-600'>{t('recipes.dragDropHelp')}</p>
+            <label
+              htmlFor='file-upload'
+              className='mt-2 inline-flex cursor-pointer bg-sunglow hover:bg-papaya text-space-cadet font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
+            >
+              <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
+              </svg>
+              <span>{t('recipes.addMedia')}</span>
+              <input
+                id='file-upload'
+                name='file-upload'
+                type='file'
+                accept='image/*,video/*'
+                multiple
+                className='sr-only'
+                onChange={handleImageChange}
+                disabled={!canEdit}
+              />
+            </label>
           </div>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.titleEs')}</label>
-            <input
-              {...register('title_es', { required: t('recipe.form.required') })}
-              className='w-full p-2 border rounded'
-            />
-            {errors.title_es && <p className='text-red-500 text-sm'>{errors.title_es.message}</p>}
-          </div>
+
+          {/* Media Previews */}
+          {mediaPreviews.length > 0 && (
+            <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mb-4'>
+              {mediaPreviews.map((preview, index) => (
+                <div key={index} className='relative group'>
+                  <img
+                    src={preview}
+                    alt={`Media ${index + 1}`}
+                    className='w-full h-32 object-cover rounded-lg shadow-md'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => removeMedia(index)}
+                    className='absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity'
+                    disabled={!canEdit}
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className='text-sm text-gray-500 mt-2'>{t('recipes.mediaHelp')}</p>
         </div>
+
+        {/* Title */}
+        <InputField
+          label={t('recipes.title')}
+          name='title'
+          register={register}
+          errors={errors}
+          required
+          disabled={!canEdit}
+          t={t}
+        />
 
         {/* Ingredients */}
-        <div>
-          <label className='block text-sm font-medium mb-2'>{t('recipe.form.ingredientsEn')}</label>
-          {ingredientsEnFields.map((field, index) => (
-            <div key={field.id} className='flex mb-2'>
-              <input
-                {...register(`ingredients_en.${index}`)}
-                className='flex-1 p-2 border rounded mr-2'
-                placeholder={`Ingredient ${index + 1}`}
-              />
-              <button type='button' onClick={() => removeEn(index)} className='px-2 py-1 bg-red-500 text-white rounded'>
-                -
-              </button>
-            </div>
-          ))}
-          <button type='button' onClick={() => appendEn('')} className='px-4 py-2 bg-green-500 text-white rounded'>
-            {t('recipe.form.addIngredient')}
-          </button>
-        </div>
-
-        <div>
-          <label className='block text-sm font-medium mb-2'>{t('recipe.form.ingredientsEs')}</label>
-          {ingredientsEsFields.map((field, index) => (
-            <div key={field.id} className='flex mb-2'>
-              <input
-                {...register(`ingredients_es.${index}`)}
-                className='flex-1 p-2 border rounded mr-2'
-                placeholder={`Ingrediente ${index + 1}`}
-              />
-              <button type='button' onClick={() => removeEs(index)} className='px-2 py-1 bg-red-500 text-white rounded'>
-                -
-              </button>
-            </div>
-          ))}
-          <button type='button' onClick={() => appendEs('')} className='px-4 py-2 bg-green-500 text-white rounded'>
-            {t('recipe.form.addIngredient')}
-          </button>
-        </div>
+        <DynamicFieldArray
+          label={t('recipes.ingredients')}
+          name='ingredients'
+          fields={ingredientsFields}
+          append={appendIngredient}
+          remove={removeIngredient}
+          register={register}
+          canEdit={canEdit}
+          t={t}
+        />
 
         {/* Instructions */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.instructionsEn')}</label>
-            <textarea
-              {...register('instructions_en', { required: t('recipe.form.required') })}
-              rows={4}
-              className='w-full p-2 border rounded'
-            />
-            {errors.instructions_en && <p className='text-red-500 text-sm'>{errors.instructions_en.message}</p>}
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.instructionsEs')}</label>
-            <textarea
-              {...register('instructions_es', { required: t('recipe.form.required') })}
-              rows={4}
-              className='w-full p-2 border rounded'
-            />
-            {errors.instructions_es && <p className='text-red-500 text-sm'>{errors.instructions_es.message}</p>}
-          </div>
+        <TextareaField
+          label={t('recipes.instructions')}
+          name='instructions'
+          register={register}
+          errors={errors}
+          disabled={!canEdit}
+        />
+
+        {/* Meta */}
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <InputField
+            label={t('recipes.prepTime')}
+            name='prep_time'
+            type='number'
+            register={register}
+            errors={errors}
+            disabled={!canEdit}
+            t={t}
+          />
+          <InputField
+            label={t('recipes.cookTime')}
+            name='cook_time'
+            type='number'
+            register={register}
+            errors={errors}
+            disabled={!canEdit}
+            t={t}
+          />
+          <InputField
+            label={t('recipes.servings')}
+            name='servings'
+            type='number'
+            register={register}
+            errors={errors}
+            disabled={!canEdit}
+            t={t}
+          />
         </div>
 
-        {/* Times and Servings */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.prepTime')}</label>
-            <input type='number' {...register('prep_time', { min: 0 })} className='w-full p-2 border rounded' />
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.cookTime')}</label>
-            <input type='number' {...register('cook_time', { min: 0 })} className='w-full p-2 border rounded' />
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.servings')}</label>
-            <input type='number' {...register('servings', { min: 1 })} className='w-full p-2 border rounded' />
-          </div>
-        </div>
+        {/* Category */}
+        <SelectField
+          label={t('recipes.category')}
+          name='category'
+          register={register}
+          errors={errors}
+          options={availableCategories}
+          disabled={!canEdit}
+          t={t}
+        />
 
-        {/* Categories and Tags */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.categories')}</label>
-            <div className='space-y-2'>
-              {availableCategories.map((category) => (
-                <label key={category} className='flex items-center'>
-                  <input type='checkbox' value={category} {...register('categories')} className='mr-2' />
-                  {category}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-2'>{t('recipe.form.tags')}</label>
-            <div className='space-y-2'>
-              {availableTags.map((tag) => (
-                <label key={tag} className='flex items-center'>
-                  <input type='checkbox' value={tag} {...register('tags')} className='mr-2' />
-                  {tag}
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Tags */}
+        <CheckboxGroup
+          label={t('recipes.tags')}
+          name='tags'
+          options={availableTags}
+          register={register}
+          disabled={!canEdit}
+        />
 
-        {/* Submit */}
-        <div className='flex justify-end space-x-4'>
-          <button type='button' onClick={() => navigate('/')} className='px-4 py-2 bg-gray-500 text-white rounded'>
-            {t('common.cancel')}
-          </button>
-          <button
-            type='submit'
-            disabled={loading}
-            className='px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50'
-          >
-            {loading ? t('common.loading') : isEdit ? t('common.update') : t('common.create')}
-          </button>
-        </div>
+        {/* Actions */}
+        {canEdit && (
+          <div className='flex justify-end space-x-4'>
+            <button
+              type='button'
+              onClick={() => navigate(isEdit ? `/recipes/${id}` : '/')}
+              className='bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-colors duration-300'
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type='submit'
+              className='bg-cerulean hover:bg-sea-green text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors duration-300'
+              disabled={loading}
+            >
+              {loading ? t('common.saving') : t('common.save')}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   )
 }
+
+// Helper components for form fields
+
+const InputField = ({ label, name, type = 'text', register, errors, required, disabled, t }) => (
+  <div>
+    <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
+    <input
+      type={type}
+      {...register(name, { required })}
+      className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-papaya focus:border-transparent disabled:bg-gray-100'
+      disabled={disabled}
+    />
+    {errors[name] && <p className='text-papaya text-sm mt-1'>{t('common.required')}</p>}
+  </div>
+)
+
+const TextareaField = ({ label, name, register, errors, disabled }) => (
+  <div>
+    <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
+    <textarea
+      {...register(name)}
+      rows='5'
+      className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-papaya focus:border-transparent disabled:bg-gray-100'
+      disabled={disabled}
+    />
+  </div>
+)
+
+const SelectField = ({ label, name, register, errors, options, disabled, t }) => (
+  <div>
+    <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
+    <select
+      {...register(name)}
+      className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-papaya focus:border-transparent disabled:bg-gray-100'
+      disabled={disabled}
+    >
+      <option value=''>{t('common.selectOption')}</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </div>
+)
+
+const CheckboxGroup = ({ label, name, options, register, disabled }) => (
+  <div>
+    <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
+    <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+      {options.map((opt) => (
+        <label key={opt} className='flex items-center space-x-2'>
+          <input
+            type='checkbox'
+            value={opt}
+            {...register(name)}
+            className='h-5 w-5 rounded border-gray-300 text-papaya focus:ring-sunglow disabled:opacity-50'
+            disabled={disabled}
+          />
+          <span className='text-gray-700'>{opt}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+)
+
+const DynamicFieldArray = ({ label, name, fields, append, remove, register, canEdit, t }) => (
+  <div>
+    <h3 className='text-xl font-semibold text-space-cadet mb-3'>{label}</h3>
+    <div className='space-y-3'>
+      {fields.map((field, index) => (
+        <div key={field.id} className='flex items-center space-x-3'>
+          <input
+            {...register(`${name}.${index}.value`)}
+            className='flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-papaya focus:border-transparent disabled:bg-gray-100'
+            disabled={!canEdit}
+          />
+          {canEdit && (
+            <button
+              type='button'
+              onClick={() => remove(index)}
+              className='p-2 bg-papaya text-white rounded-full hover:bg-red-700'
+            >
+              <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M18 12H6' />
+              </svg>
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+    {canEdit && (
+      <button
+        type='button'
+        onClick={() => append({ value: '' })}
+        className='mt-4 bg-seaGreen hover:bg-cerulean text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300'
+      >
+        {t('common.add')}
+      </button>
+    )}
+  </div>
+)
 
 export default RecipeForm

@@ -77,7 +77,7 @@ describe('Login', () => {
   })
 
   it('renders login form correctly', () => {
-    const { store } = renderWithProviders(<Login />, {
+    renderWithProviders(<Login />, {
       preloadedState: {
         auth: {
           user: null,
@@ -99,7 +99,7 @@ describe('Login', () => {
   })
 
   it('shows validation errors for empty form submission', async () => {
-    const { store } = renderWithProviders(<Login />, {
+    renderWithProviders(<Login />, {
       preloadedState: {
         auth: {
           user: null,
@@ -127,7 +127,7 @@ describe('Login', () => {
   })
 
   it.skip('shows validation error for invalid email', async () => {
-    const { store } = renderWithProviders(<Login />, {
+    renderWithProviders(<Login />, {
       preloadedState: {
         auth: {
           user: null,
@@ -158,7 +158,7 @@ describe('Login', () => {
   })
 
   it('shows validation error for short password', async () => {
-    const { store } = renderWithProviders(<Login />, {
+    renderWithProviders(<Login />, {
       preloadedState: {
         auth: {
           user: null,
@@ -270,7 +270,7 @@ describe('Login', () => {
       () => new Promise((resolve) => setTimeout(() => resolve({ token: 'token', user: {} }), 100))
     )
 
-    const { store } = renderWithProviders(<Login />, {
+    renderWithProviders(<Login />, {
       preloadedState: {
         auth: {
           user: null,
@@ -351,7 +351,7 @@ describe('Login', () => {
   })
 
   it('toggles password visibility', () => {
-    const { store } = renderWithProviders(<Login />, {
+    renderWithProviders(<Login />, {
       preloadedState: {
         auth: {
           user: null,

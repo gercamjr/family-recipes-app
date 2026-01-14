@@ -19,20 +19,46 @@ const inviteSchema = z.object({
 })
 
 // Recipe validation schemas
-const recipeSchema = z.object({
-  titleEn: z.string().min(1, 'English title is required'),
-  titleEs: z.string().min(1, 'Spanish title is required').optional(),
-  ingredientsEn: z.array(z.string()).min(1, 'At least one English ingredient is required'),
-  ingredientsEs: z.array(z.string()).min(1, 'At least one Spanish ingredient is required').optional(),
-  instructionsEn: z.string().min(1, 'English instructions are required'),
-  instructionsEs: z.string().min(1, 'Spanish instructions are required').optional(),
-  prepTime: z.number().int().min(0).optional(),
-  cookTime: z.number().int().min(0).optional(),
-  servings: z.number().int().min(1).optional(),
-  tags: z.array(z.string()).optional(),
-  categories: z.array(z.string()).optional(),
-  isPublic: z.boolean().optional().default(false),
-})
+const recipeSchema = z
+  .object({
+    titleEn: z.string().min(1, 'English title is required').optional(),
+    titleEs: z.string().min(1, 'Spanish title is required').optional(),
+    ingredientsEn: z.array(z.string()).min(1, 'At least one English ingredient is required').optional(),
+    ingredientsEs: z.array(z.string()).min(1, 'At least one Spanish ingredient is required').optional(),
+    instructionsEn: z.string().min(1, 'English instructions are required').optional(),
+    instructionsEs: z.string().min(1, 'Spanish instructions are required').optional(),
+    image_url: z.string().url().optional(), // Deprecated - for backwards compatibility
+    media: z
+      .array(
+        z.object({
+          url: z.string().url(),
+          type: z.enum(['image', 'video']),
+          filename: z.string().optional(),
+          size: z.number().optional(),
+          mimeType: z.string().optional(),
+        })
+      )
+      .optional(),
+    prepTime: z.number().int().min(0).optional(),
+    prep_time: z.union([z.number(), z.string().transform(Number)]).optional(),
+    cookTime: z.number().int().min(0).optional(),
+    cook_time: z.union([z.number(), z.string().transform(Number)]).optional(),
+    servings: z.union([z.number().int().min(1), z.string().transform(Number)]).optional(),
+    tags: z.array(z.string()).optional(),
+    categories: z.array(z.string()).optional(),
+    isPublic: z.boolean().optional().default(true),
+  })
+  .refine(
+    (data) => {
+      // Ensure at least one language is provided
+      const hasEnglish = data.titleEn && data.ingredientsEn && data.instructionsEn
+      const hasSpanish = data.titleEs && data.ingredientsEs && data.instructionsEs
+      return hasEnglish || hasSpanish
+    },
+    {
+      message: 'Recipe must have at least one complete language version (title, ingredients, and instructions)',
+    }
+  )
 
 const recipeUpdateSchema = recipeSchema.partial()
 
@@ -45,10 +71,16 @@ const commentSchema = z.object({
 const searchQuerySchema = z.object({
   search: z.string().optional(),
   category: z.string().optional(),
-  tag: z.string().optional(),
+  tags: z.union([z.string(), z.array(z.string())]).optional(),
   language: z.enum(['en', 'es']).optional(),
-  page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(50).optional(),
+  page: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .optional(),
+  limit: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .optional(),
 })
 
 // Email sharing validation
@@ -60,7 +92,7 @@ const emailShareSchema = z.object({
 // Validation middleware
 const validate = (schema) => (req, res, next) => {
   try {
-    schema.parse(req.body)
+    req.body = schema.parse(req.body)
     next()
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -79,7 +111,7 @@ const validate = (schema) => (req, res, next) => {
 
 const validateQuery = (schema) => (req, res, next) => {
   try {
-    schema.parse(req.query)
+    req.query = schema.parse(req.query)
     next()
   } catch (error) {
     if (error instanceof z.ZodError) {

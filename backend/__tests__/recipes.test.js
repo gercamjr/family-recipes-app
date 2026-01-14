@@ -17,6 +17,10 @@ jest.mock('../lib/prisma', () => ({
     delete: jest.fn(),
     count: jest.fn(),
   },
+  media: {
+    deleteMany: jest.fn(),
+    create: jest.fn(),
+  },
 }))
 const prisma = require('../lib/prisma')
 
@@ -50,6 +54,17 @@ const recipe = {
     id: user.id,
     email: user.email,
   },
+  media: [
+    {
+      id: 1,
+      url: 'https://cloudinary.com/test.jpg',
+      type: 'image',
+      filename: 'test.jpg',
+      size: 12345,
+      mimeType: 'image/jpeg',
+      recipeId: 1,
+    },
+  ],
   _count: {
     comments: 0,
     favorites: 0,
@@ -172,13 +187,57 @@ describe('Recipes API', () => {
           ingredientsEn: newRecipeData.ingredientsEn,
           instructionsEn: newRecipeData.instructionsEn,
           authorId: user.id,
+          isPublic: true,
+          media: {
+            create: [],
+          },
         },
         include: {
           author: {
             select: { id: true, email: true },
           },
+          media: true,
         },
       })
+    })
+
+    it('should create a new recipe with media', async () => {
+      jwt.verify.mockReturnValue({ id: user.id })
+      prisma.user.findUnique.mockResolvedValue(user)
+      const mediaData = [
+        {
+          url: 'https://cloudinary.com/image1.jpg',
+          type: 'image',
+          filename: 'image1.jpg',
+          size: 12345,
+          mimeType: 'image/jpeg',
+        },
+      ]
+      const recipeWithMedia = {
+        ...recipe,
+        ...newRecipeData,
+        id: 2,
+        authorId: user.id,
+        media: mediaData,
+      }
+      prisma.recipe.create.mockResolvedValue(recipeWithMedia)
+
+      const res = await request(app)
+        .post('/api/recipes')
+        .set('Authorization', 'Bearer valid-token')
+        .send({ ...newRecipeData, media: mediaData })
+
+      expect(res.statusCode).toEqual(201)
+      expect(res.body.recipe.title).toEqual(newRecipeData.titleEn)
+      expect(prisma.recipe.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            media: {
+              create: mediaData,
+            },
+          }),
+        })
+      )
     })
 
     it('should return 401 if user is not authenticated', async () => {
@@ -207,6 +266,42 @@ describe('Recipes API', () => {
 
       expect(res.statusCode).toEqual(200)
       expect(res.body.recipe.title).toEqual(updatedData.titleEn)
+    })
+
+    it('should update a recipe with new media', async () => {
+      jwt.verify.mockReturnValue({ id: user.id })
+      prisma.user.findUnique.mockResolvedValue(user)
+      prisma.recipe.findUnique.mockResolvedValue(recipe)
+      const newMedia = [
+        {
+          url: 'https://cloudinary.com/new-image.jpg',
+          type: 'image',
+          filename: 'new-image.jpg',
+          size: 54321,
+          mimeType: 'image/jpeg',
+        },
+      ]
+      prisma.media.deleteMany.mockResolvedValue({ count: 1 })
+      prisma.recipe.update.mockResolvedValue({ ...recipe, ...updatedData, media: newMedia })
+
+      const res = await request(app)
+        .put(`/api/recipes/${recipe.id}`)
+        .set('Authorization', 'Bearer valid-token')
+        .send({ ...updatedData, media: newMedia })
+
+      expect(res.statusCode).toEqual(200)
+      expect(prisma.media.deleteMany).toHaveBeenCalledWith({
+        where: { recipeId: recipe.id },
+      })
+      expect(prisma.recipe.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            media: {
+              create: newMedia,
+            },
+          }),
+        })
+      )
     })
 
     it('should return 403 if user is not the author or an admin/editor', async () => {

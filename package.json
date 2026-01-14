@@ -36,6 +36,7 @@
     "docker:health": "echo 'Checking service health...' && docker compose ps && echo '' && echo 'PostgreSQL health check:' && docker compose exec postgres pg_isready -U family_recipes_user -d family_recipes_db || echo 'PostgreSQL not ready' && echo '' && echo 'Backend health check:' && curl -s http://localhost:5001/api/health || echo 'Backend not responding' && echo '' && echo 'Frontend health check:' && curl -s http://localhost:5173 || echo 'Frontend not responding'"
   },
   "devDependencies": {
+    "baseline-browser-mapping": "^2.9.14",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3"
   },

@@ -40,7 +40,8 @@ const createMockStore = (initialState) => {
 
 const mockRecipe = {
   id: 1,
-  user_id: 1,
+  author: { id: 1 },
+  title: 'Test Recipe',
   title_en: 'Test Recipe',
   title_es: 'Receta de Prueba',
   ingredients_en: ['ingredient 1', 'ingredient 2'],
@@ -50,12 +51,21 @@ const mockRecipe = {
   prep_time: 10,
   cook_time: 20,
   servings: 4,
-  tags: ['tag1'],
-  categories: ['category1'],
+  tags: ['tag1', 'tag2'],
+  category: 'category1',
+  image_url: 'https://example.com/image.jpg',
+  rating_avg: 4.5,
   created_at: '2023-01-01',
 }
 
-const renderWithProviders = (component, initialState = {}) => {
+const renderWithProviders = (
+  component,
+  initialState = {
+    auth: { user: null },
+    recipes: { favorites: [] },
+    ui: { language: 'en' },
+  }
+) => {
   const store = createMockStore(initialState)
   return render(
     <Provider store={store}>
@@ -78,7 +88,8 @@ describe('RecipeCard', () => {
   })
 
   it('renders recipe title in Spanish', () => {
-    renderWithProviders(<RecipeCard recipe={mockRecipe} />, {
+    const spanishRecipe = { ...mockRecipe, title: 'Receta de Prueba' }
+    renderWithProviders(<RecipeCard recipe={spanishRecipe} />, {
       ui: { language: 'es' },
     })
 
@@ -92,8 +103,8 @@ describe('RecipeCard', () => {
   })
 
   it('shows favorite button and toggles favorite', () => {
-    const mockOnView = vi.fn()
-    renderWithProviders(<RecipeCard recipe={mockRecipe} onView={mockOnView} />, {
+    const mockOnToggleFavorite = vi.fn()
+    renderWithProviders(<RecipeCard recipe={mockRecipe} onToggleFavorite={mockOnToggleFavorite} />, {
       auth: { user: { id: 1 } },
       recipes: { favorites: [] },
     })
@@ -127,7 +138,7 @@ describe('RecipeCard', () => {
     const mockOnView = vi.fn()
     renderWithProviders(<RecipeCard recipe={mockRecipe} onView={mockOnView} />)
 
-    const card = screen.getByText('Receta de Prueba').closest('div')
+    const card = screen.getByText('Test Recipe').closest('div')
     fireEvent.click(card)
 
     expect(mockOnView).toHaveBeenCalledWith(mockRecipe)
@@ -160,6 +171,6 @@ describe('RecipeCard', () => {
   it('renders without crashing', () => {
     renderWithProviders(<RecipeCard recipe={mockRecipe} />)
 
-    expect(screen.getByText('Receta de Prueba')).toBeInTheDocument()
+    expect(screen.getByText('Test Recipe')).toBeInTheDocument()
   })
 })

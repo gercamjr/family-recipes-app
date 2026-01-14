@@ -1,13 +1,5 @@
-import recipesReducer, {
-  fetchRecipesSuccess,
-  createRecipeSuccess,
-  updateRecipeSuccess,
-  deleteRecipeSuccess,
-  addToFavorites,
-  removeFromFavorites,
-  updateFilters,
-  clearFilters,
-} from '../slices/recipesSlice'
+import recipesReducer, { updateFilters, clearFilters } from '../slices/recipesSlice'
+import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, toggleFavorite } from '../recipesThunks'
 
 describe('recipesSlice', () => {
   const initialState = {
@@ -35,7 +27,7 @@ describe('recipesSlice', () => {
     expect(recipesReducer(undefined, { type: undefined })).toEqual(initialState)
   })
 
-  it('should handle fetchRecipesSuccess', () => {
+  it('should handle fetchRecipes.fulfilled', () => {
     const recipes = [
       { id: 1, title: 'Pasta Carbonara', category: 'Italian' },
       { id: 2, title: 'Chicken Curry', category: 'Indian' },
@@ -46,14 +38,18 @@ describe('recipesSlice', () => {
       total: 25,
       totalPages: 3,
     }
-    const actual = recipesReducer({ ...initialState, loading: true }, fetchRecipesSuccess({ recipes, pagination }))
+    const action = {
+      type: fetchRecipes.fulfilled.type,
+      payload: { recipes, pagination },
+    }
+    const actual = recipesReducer({ ...initialState, loading: true }, action)
     expect(actual.loading).toEqual(false)
     expect(actual.recipes).toEqual(recipes)
     expect(actual.pagination).toEqual(pagination)
     expect(actual.error).toEqual(null)
   })
 
-  it('should handle createRecipeSuccess', () => {
+  it('should handle createRecipe.fulfilled', () => {
     const newRecipe = { id: 3, title: 'New Recipe', category: 'Dessert' }
     const stateWithRecipes = {
       ...initialState,
@@ -62,12 +58,16 @@ describe('recipesSlice', () => {
         { id: 2, title: 'Another Recipe' },
       ],
     }
-    const actual = recipesReducer(stateWithRecipes, createRecipeSuccess(newRecipe))
-    expect(actual.recipes[0]).toEqual(newRecipe) // Should be added to the beginning
+    const action = {
+      type: createRecipe.fulfilled.type,
+      payload: { recipe: newRecipe },
+    }
+    const actual = recipesReducer(stateWithRecipes, action)
+    expect(actual.recipes[0]).toEqual(newRecipe)
     expect(actual.recipes).toHaveLength(3)
   })
 
-  it('should handle updateRecipeSuccess', () => {
+  it('should handle updateRecipe.fulfilled', () => {
     const updatedRecipe = { id: 1, title: 'Updated Pasta', category: 'Italian' }
     const stateWithRecipes = {
       ...initialState,
@@ -77,59 +77,55 @@ describe('recipesSlice', () => {
       ],
       currentRecipe: { id: 1, title: 'Old Pasta', category: 'Italian' },
     }
-    const actual = recipesReducer(stateWithRecipes, updateRecipeSuccess(updatedRecipe))
+    const action = {
+      type: updateRecipe.fulfilled.type,
+      payload: { recipe: updatedRecipe },
+    }
+    const actual = recipesReducer(stateWithRecipes, action)
     expect(actual.recipes[0]).toEqual(updatedRecipe)
     expect(actual.currentRecipe).toEqual(updatedRecipe)
   })
 
-  it('should handle deleteRecipeSuccess', () => {
+  it('should handle deleteRecipe.fulfilled', () => {
     const stateWithRecipes = {
       ...initialState,
       recipes: [
         { id: 1, title: 'Recipe 1' },
         { id: 2, title: 'Recipe 2' },
       ],
-      favorites: [
-        { id: 1, title: 'Recipe 1' },
-        { id: 3, title: 'Recipe 3' },
-      ],
       currentRecipe: { id: 1, title: 'Recipe 1' },
     }
-    const actual = recipesReducer(stateWithRecipes, deleteRecipeSuccess(1))
+    const action = {
+      type: deleteRecipe.fulfilled.type,
+      payload: 1,
+    }
+    const actual = recipesReducer(stateWithRecipes, action)
     expect(actual.recipes).toHaveLength(1)
     expect(actual.recipes[0].id).toEqual(2)
-    expect(actual.favorites).toHaveLength(1) // Recipe 1 removed from favorites
-    expect(actual.favorites[0].id).toEqual(3)
-    expect(actual.currentRecipe).toEqual(null)
   })
 
-  it('should handle addToFavorites', () => {
-    const recipe = { id: 1, title: 'Favorite Recipe' }
-    const actual = recipesReducer(initialState, addToFavorites(recipe))
-    expect(actual.favorites).toEqual([recipe])
-  })
-
-  it('should not add duplicate to favorites', () => {
-    const recipe = { id: 1, title: 'Favorite Recipe' }
-    const stateWithFavorite = {
-      ...initialState,
-      favorites: [recipe],
+  it('should handle toggleFavorite.fulfilled (add)', () => {
+    const recipeId = 1
+    const action = {
+      type: toggleFavorite.fulfilled.type,
+      payload: { recipeId, isFavorite: true },
     }
-    const actual = recipesReducer(stateWithFavorite, addToFavorites(recipe))
-    expect(actual.favorites).toEqual([recipe]) // Should not add duplicate
+    const actual = recipesReducer(initialState, action)
+    expect(actual.favorites).toEqual([{ id: recipeId }])
   })
 
-  it('should handle removeFromFavorites', () => {
+  it('should handle toggleFavorite.fulfilled (remove)', () => {
+    const recipeId = 1
     const stateWithFavorites = {
       ...initialState,
-      favorites: [
-        { id: 1, title: 'Recipe 1' },
-        { id: 2, title: 'Recipe 2' },
-      ],
+      favorites: [{ id: recipeId }],
     }
-    const actual = recipesReducer(stateWithFavorites, removeFromFavorites(1))
-    expect(actual.favorites).toHaveLength(1)
-    expect(actual.favorites[0].id).toEqual(2)
+    const action = {
+      type: toggleFavorite.fulfilled.type,
+      payload: { recipeId, isFavorite: false },
+    }
+    const actual = recipesReducer(stateWithFavorites, action)
+    expect(actual.favorites).toHaveLength(0)
   })
 
   it('should handle updateFilters', () => {

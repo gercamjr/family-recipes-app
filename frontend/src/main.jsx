@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { Provider } from 'react-redux'
+import { Provider, useSelector } from 'react-redux'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { store } from './store'
 import App from './App'
@@ -8,23 +8,22 @@ import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import RecipeForm from './components/recipes/RecipeForm'
 import RecipeDetail from './components/recipes/RecipeDetail'
+import ProtectedLayout from './components/ui/ProtectedLayout'
 import './i18n'
 import './index.css'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = store.getState().auth.isAuthenticated
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
 
   if (!isAuthenticated) {
     return <Navigate to='/login' replace />
   }
 
-  return children
-}
-
-// Public Route component (redirects to app if already authenticated)
+  return <ProtectedLayout>{children}</ProtectedLayout>
+} // Public Route component (redirects to app if already authenticated)
 const PublicRoute = ({ children }) => {
-  const isAuthenticated = store.getState().auth.isAuthenticated
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
 
   if (isAuthenticated) {
     return <Navigate to='/' replace />
@@ -36,7 +35,12 @@ const PublicRoute = ({ children }) => {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
-      <Router>
+      <Router
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <Routes>
           <Route
             path='/login'
@@ -93,9 +97,24 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 
-if ('serviceWorker' in navigator) {
-  // Use the window load event to keep the page load performant
+// Register Service Worker for PWA (only in production)
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered successfully:', registration.scope)
+      })
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error)
+      })
+  })
+} else if ('serviceWorker' in navigator && import.meta.env.DEV) {
+  // Unregister service worker in development
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      registration.unregister()
+      console.log('Service Worker unregistered for development')
+    })
   })
 }

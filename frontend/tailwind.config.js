@@ -1,8 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        papaya: '#F06449',
+        sunglow: '#FFD166',
+        seaGreen: '#06D6A0',
+        cerulean: '#118AB2',
+        spaceCadet: '#073B4C',
+        offWhite: '#FDF0D5',
+      },
+    },
   },
   plugins: [],
 }

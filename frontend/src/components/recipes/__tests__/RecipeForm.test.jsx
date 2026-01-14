@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -8,13 +8,16 @@ import authSlice from '../../../store/slices/authSlice'
 import recipesSlice from '../../../store/slices/recipesSlice'
 import uiSlice from '../../../store/slices/uiSlice'
 import i18nMiddleware from '../../../store/middleware/i18nMiddleware'
+import api from '../../../services/api'
 
 // Mock the api service
 vi.mock('../../../services/api', () => ({
-  post: vi.fn(),
-  get: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
+  default: {
+    post: vi.fn(),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
 }))
 
 // Mock react-i18next
@@ -82,7 +85,7 @@ describe('RecipeForm', () => {
   })
 
   it('renders create form correctly', () => {
-    const { store } = renderWithProviders(<RecipeForm />, {
+    renderWithProviders(<RecipeForm />, {
       preloadedState: {
         auth: {
           user: { id: 1, email: 'test@example.com' },
@@ -102,22 +105,33 @@ describe('RecipeForm', () => {
       },
     })
 
-    expect(screen.getByText('recipe.form.createTitle')).toBeInTheDocument()
-    expect(screen.getByText('recipe.form.titleEn')).toBeInTheDocument()
-    expect(screen.getByText('recipe.form.titleEs')).toBeInTheDocument()
+    expect(screen.getByText('recipes.createRecipe')).toBeInTheDocument()
+    expect(screen.getByText('recipes.title')).toBeInTheDocument()
+    expect(screen.getByText('recipes.recipeLanguage')).toBeInTheDocument()
+    expect(screen.getByText('English')).toBeInTheDocument()
+    expect(screen.getByText('Español')).toBeInTheDocument()
   })
 
-  it('renders edit form when recipe is provided', () => {
+  it('renders edit form when recipe is provided', async () => {
     const mockRecipe = {
       id: 1,
       title_en: 'Test Recipe',
       title_es: 'Receta de Prueba',
       ingredients_en: ['Ingredient 1'],
+      ingredients_es: ['Ingrediente 1'],
       instructions_en: 'Test instructions',
-      user_id: 1,
+      instructions_es: 'Instrucciones de prueba',
+      prep_time: 10,
+      cook_time: 20,
+      servings: 4,
+      tags: [],
+      category: '',
+      author: { id: 1 },
     }
 
-    const { store } = renderWithProviders(<RecipeForm />, {
+    api.get.mockResolvedValue({ data: { recipe: mockRecipe } })
+
+    renderWithProviders(<RecipeForm />, {
       preloadedState: {
         auth: {
           user: { id: 1, email: 'test@example.com' },
@@ -138,18 +152,32 @@ describe('RecipeForm', () => {
       routeParams: { id: '1' },
     })
 
-    expect(screen.getByText('recipe.form.editTitle')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('recipes.editRecipe')).toBeInTheDocument()
+    })
     expect(screen.getByDisplayValue('Test Recipe')).toBeInTheDocument()
   })
 
-  it('shows permission error for non-owner', () => {
+  it('shows permission error for non-owner', async () => {
     const mockRecipe = {
       id: 1,
       title_en: 'Test Recipe',
-      user_id: 2, // Different user
+      title_es: 'Receta de Prueba',
+      ingredients_en: ['Ingredient 1'],
+      ingredients_es: ['Ingrediente 1'],
+      instructions_en: 'Test instructions',
+      instructions_es: 'Instrucciones de prueba',
+      prep_time: 10,
+      cook_time: 20,
+      servings: 4,
+      tags: [],
+      category: '',
+      author: { id: 2 }, // Different user
     }
 
-    const { store } = renderWithProviders(<RecipeForm />, {
+    api.get.mockResolvedValue({ data: { recipe: mockRecipe } })
+
+    renderWithProviders(<RecipeForm />, {
       preloadedState: {
         auth: {
           user: { id: 1, email: 'test@example.com' },
@@ -170,6 +198,8 @@ describe('RecipeForm', () => {
       routeParams: { id: '1' },
     })
 
-    expect(screen.getByText('recipe.form.noPermission')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('common.unauthorized')).toBeInTheDocument()
+    })
   })
 })
