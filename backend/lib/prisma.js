@@ -2,10 +2,17 @@ const { PrismaClient } = require('@prisma/client')
 const { PrismaPg } = require('@prisma/adapter-pg')
 const { Pool } = require('pg')
 
-// Use DB_POSTGRES_PRISMA_URL (Neon) or DATABASE_URL (Local/Production Standard)
-// This ensures the app connects to the correct DB in Vercel even if DATABASE_URL is not manually set
+// Prefer Neon/Vercel-specific URLs first to avoid connecting to the wrong DB when multiple vars are set:
+// 1) DB_POSTGRES_PRISMA_URL (Neon)  2) POSTGRES_PRISMA_URL (fallback)  3) DATABASE_URL (local/standard)
 const connectionString =
-  process.env.DATABASE_URL || process.env.DB_POSTGRES_PRISMA_URL || process.env.POSTGRES_PRISMA_URL
+  process.env.DB_POSTGRES_PRISMA_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error(
+    'No database connection string found. Please set one of the following environment variables: ' +
+    'DB_POSTGRES_PRISMA_URL, POSTGRES_PRISMA_URL, or DATABASE_URL'
+  )
+}
 
 const pool = new Pool({ connectionString })
 const adapter = new PrismaPg(pool)
