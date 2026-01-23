@@ -3,6 +3,10 @@ const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 const cookieParser = require('cookie-parser')
+const path = require('path')
+
+// Load environment variables from root .env.local if available (dev), then .env
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') })
 require('dotenv').config()
 
 const app = express()
@@ -16,7 +20,7 @@ app.use(
         ? ['https://family-recipes-app-geracamodev.vercel.app', 'https://family-recipes-app.vercel.app']
         : ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true,
-  })
+  }),
 )
 
 // Rate limiting
