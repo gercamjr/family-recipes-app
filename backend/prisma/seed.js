@@ -14,9 +14,20 @@
  */
 
 const { PrismaClient } = require('@prisma/client')
+const { PrismaPg } = require('@prisma/adapter-pg')
+const { Pool } = require('pg')
 const { hashPassword } = require('../utils/auth')
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env.local') })
 
-const prisma = new PrismaClient()
+const connectionString =
+  process.env.DB_POSTGRES_PRISMA_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+
+const prisma = new PrismaClient({
+  adapter,
+  log: ['info', 'warn', 'error'],
+})
 
 async function main() {
   console.log('🌱 Starting database seeding...')

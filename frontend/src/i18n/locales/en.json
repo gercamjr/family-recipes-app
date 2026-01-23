@@ -162,7 +162,9 @@
     "required": "This field is required",
     "unauthorized": "You don't have permission to perform this action",
     "add": "Add",
-    "selectOption": "Select an option..."
+    "selectOption": "Select an option...",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "validation": {
     "required": "This field is required",

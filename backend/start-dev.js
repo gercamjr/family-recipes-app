@@ -7,10 +7,8 @@
  * if no users exist, then starts the development server.
  */
 
-const { PrismaClient } = require('@prisma/client')
 const { spawn } = require('child_process')
-
-const prisma = new PrismaClient()
+const prisma = require('./lib/prisma')
 
 async function checkNeedsSeeding() {
   try {
