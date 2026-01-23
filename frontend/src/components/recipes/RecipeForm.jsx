@@ -29,6 +29,7 @@ const RecipeForm = () => {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
     reset,
   } = useForm({
@@ -52,6 +53,8 @@ const RecipeForm = () => {
 
   const availableTags = ['Quick', 'Easy', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Spicy', 'Healthy']
   const availableCategories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack', 'Beverage']
+
+  const currentTags = watch('tags') || []
 
   useEffect(() => {
     if (isEdit) {
@@ -362,12 +365,13 @@ const RecipeForm = () => {
         />
 
         {/* Tags */}
-        <CheckboxGroup
+        <TagInput
           label={t('recipes.tags')}
-          name='tags'
+          value={currentTags}
+          onChange={(newTags) => setValue('tags', newTags, { shouldDirty: true, shouldValidate: true })}
           options={availableTags}
-          register={register}
           disabled={!canEdit}
+          t={t}
         />
 
         {/* Actions */}
@@ -439,25 +443,116 @@ const SelectField = ({ label, name, register, errors, options, disabled, t }) =>
   </div>
 )
 
-const CheckboxGroup = ({ label, name, options, register, disabled }) => (
-  <div>
-    <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
-    <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-      {options.map((opt) => (
-        <label key={opt} className='flex items-center space-x-2'>
-          <input
-            type='checkbox'
-            value={opt}
-            {...register(name)}
-            className='h-5 w-5 rounded border-gray-300 text-papaya focus:ring-sunglow disabled:opacity-50'
-            disabled={disabled}
-          />
-          <span className='text-gray-700'>{opt}</span>
-        </label>
-      ))}
+const TagInput = ({ label, value = [], onChange, options, disabled, t }) => {
+  const [inputValue, setInputValue] = useState('')
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addTag()
+    }
+  }
+
+  const addTag = () => {
+    const trimmed = inputValue.trim()
+    if (trimmed && !value.includes(trimmed)) {
+      onChange([...value, trimmed])
+      setInputValue('')
+    }
+  }
+
+  const removeTag = (tagToRemove) => {
+    onChange(value.filter((tag) => tag !== tagToRemove))
+  }
+
+  const toggleOption = (opt) => {
+    if (value.includes(opt)) {
+      removeTag(opt)
+    } else {
+      onChange([...value, opt])
+    }
+  }
+
+  return (
+    <div>
+      <label className='block text-lg font-semibold text-space-cadet mb-2'>{label}</label>
+
+      {/* Selected Tags Display */}
+      <div className='flex flex-wrap gap-2 mb-3 min-h-[46px] p-2 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600'>
+        {value.length === 0 && (
+          <span className='text-gray-400 dark:text-gray-500 italic text-sm p-1 self-center'>
+            {t('recipes.noTagsSelected', 'No tags selected')}
+          </span>
+        )}
+        {value.map((tag) => (
+          <span
+            key={tag}
+            className='inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-sea-green text-white shadow-sm transition-all duration-300 transform hover:scale-105'
+          >
+            {tag}
+            {!disabled && (
+              <button
+                type='button'
+                onClick={() => removeTag(tag)}
+                className='ml-2 text-white hover:text-red-100 focus:outline-none'
+                aria-label={`Remove ${tag}`}
+              >
+                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
+                </svg>
+              </button>
+            )}
+          </span>
+        ))}
+      </div>
+
+      {!disabled && (
+        <div className='space-y-4'>
+          {/* Input for new tags */}
+          <div className='flex gap-2'>
+            <input
+              type='text'
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={t('recipes.addTagPlaceholder') || 'Type a tag and press Enter...'}
+              className='flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-papaya focus:border-transparent dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            />
+            <button
+              type='button'
+              onClick={addTag}
+              className='bg-cerulean hover:bg-sea-green text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+              disabled={!inputValue.trim()}
+            >
+              {t('common.add')}
+            </button>
+          </div>
+
+          {/* Suggested/Available Tags */}
+          <div>
+            <p className='text-sm font-medium text-gray-500 mb-2'>{t('recipes.suggestedTags') || 'Suggested Tags:'}</p>
+            <div className='flex flex-wrap gap-2'>
+              {options.map((opt) => {
+                const isSelected = value.includes(opt)
+                if (isSelected) return null // Already in selected list
+                return (
+                  <button
+                    key={opt}
+                    type='button'
+                    onClick={() => toggleOption(opt)}
+                    className='px-3 py-1 rounded-full text-sm border border-gray-300 text-gray-600 bg-white hover:border-sea-green hover:text-sea-green hover:bg-mint-cream transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
+                  >
+                    + {opt}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)
+  )
+}
 
 const DynamicFieldArray = ({ label, name, fields, append, remove, register, canEdit, t }) => (
   <div>
