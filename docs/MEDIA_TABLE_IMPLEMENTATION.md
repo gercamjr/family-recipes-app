@@ -74,7 +74,7 @@ Updated the Family Recipes App to properly use the Media table for storing multi
 
 - **Added** media update logic
 - Deletes existing media and creates new ones when media array is provided
-- Properly handles snake_case (`prep_time`, `cook_time`) to camelCase conversion
+- Expects camelCase (`prepTime`, `cookTime`) inputs directly
 
 #### GET Routes
 

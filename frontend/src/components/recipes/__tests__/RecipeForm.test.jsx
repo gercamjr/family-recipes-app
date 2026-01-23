@@ -62,7 +62,7 @@ const setupStore = (preloadedState) => {
 // Custom render function that sets up Redux store and router
 const renderWithProviders = (
   ui,
-  { preloadedState = {}, store = setupStore(preloadedState), routeParams = {}, ...renderOptions } = {}
+  { preloadedState = {}, store = setupStore(preloadedState), routeParams = {}, ...renderOptions } = {},
 ) => {
   // Mock useParams to return the route params
   useParams.mockReturnValue(routeParams)
@@ -115,14 +115,14 @@ describe('RecipeForm', () => {
   it('renders edit form when recipe is provided', async () => {
     const mockRecipe = {
       id: 1,
-      title_en: 'Test Recipe',
-      title_es: 'Receta de Prueba',
-      ingredients_en: ['Ingredient 1'],
-      ingredients_es: ['Ingrediente 1'],
-      instructions_en: 'Test instructions',
-      instructions_es: 'Instrucciones de prueba',
-      prep_time: 10,
-      cook_time: 20,
+      titleEn: 'Test Recipe',
+      titleEs: 'Receta de Prueba',
+      ingredientsEn: ['Ingredient 1'],
+      ingredientsEs: ['Ingrediente 1'],
+      instructionsEn: 'Test instructions',
+      instructionsEs: 'Instrucciones de prueba',
+      prepTime: 10,
+      cookTime: 20,
       servings: 4,
       tags: [],
       category: '',
@@ -161,14 +161,14 @@ describe('RecipeForm', () => {
   it('shows permission error for non-owner', async () => {
     const mockRecipe = {
       id: 1,
-      title_en: 'Test Recipe',
-      title_es: 'Receta de Prueba',
-      ingredients_en: ['Ingredient 1'],
-      ingredients_es: ['Ingrediente 1'],
-      instructions_en: 'Test instructions',
-      instructions_es: 'Instrucciones de prueba',
-      prep_time: 10,
-      cook_time: 20,
+      titleEn: 'Test Recipe',
+      titleEs: 'Receta de Prueba',
+      ingredientsEn: ['Ingredient 1'],
+      ingredientsEs: ['Ingrediente 1'],
+      instructionsEn: 'Test instructions',
+      instructionsEs: 'Instrucciones de prueba',
+      prepTime: 10,
+      cookTime: 20,
       servings: 4,
       tags: [],
       category: '',

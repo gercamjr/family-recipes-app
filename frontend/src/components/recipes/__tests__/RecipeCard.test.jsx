@@ -42,14 +42,14 @@ const mockRecipe = {
   id: 1,
   author: { id: 1 },
   title: 'Test Recipe',
-  title_en: 'Test Recipe',
-  title_es: 'Receta de Prueba',
-  ingredients_en: ['ingredient 1', 'ingredient 2'],
-  ingredients_es: ['ingrediente 1', 'ingrediente 2'],
-  instructions_en: 'Mix ingredients',
-  instructions_es: 'Mezclar ingredientes',
-  prep_time: 10,
-  cook_time: 20,
+  titleEn: 'Test Recipe',
+  titleEs: 'Receta de Prueba',
+  ingredientsEn: ['ingredient 1', 'ingredient 2'],
+  ingredientsEs: ['ingrediente 1', 'ingrediente 2'],
+  instructionsEn: 'Mix ingredients',
+  instructionsEs: 'Mezclar ingredientes',
+  prepTime: 10,
+  cookTime: 20,
   servings: 4,
   tags: ['tag1', 'tag2'],
   category: 'category1',
@@ -64,13 +64,13 @@ const renderWithProviders = (
     auth: { user: null },
     recipes: { favorites: [] },
     ui: { language: 'en' },
-  }
+  },
 ) => {
   const store = createMockStore(initialState)
   return render(
     <Provider store={store}>
       <BrowserRouter>{component}</BrowserRouter>
-    </Provider>
+    </Provider>,
   )
 }
 

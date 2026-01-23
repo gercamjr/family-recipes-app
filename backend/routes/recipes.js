@@ -132,7 +132,17 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
 
     const language = req.user?.languagePref || 'en'
-    const formattedRecipe = formatRecipeResponse(recipe, language)
+
+    // Include raw fields for editing (create new object to avoid type mutation warnings)
+    const formattedRecipe = {
+      ...formatRecipeResponse(recipe, language),
+      titleEn: recipe.titleEn,
+      titleEs: recipe.titleEs,
+      ingredientsEn: recipe.ingredientsEn,
+      ingredientsEs: recipe.ingredientsEs,
+      instructionsEn: recipe.instructionsEn,
+      instructionsEs: recipe.instructionsEs,
+    }
 
     res.json({ recipe: formattedRecipe })
   } catch (error) {
@@ -155,19 +165,17 @@ router.post('/', authenticateToken, validate(recipeSchema), async (req, res) => 
       instructionsEs,
       image_url, // Deprecated - kept for backwards compatibility
       media, // Array of media objects from upload
-      prep_time,
-      cook_time,
+      prepTime,
+      cookTime,
       ...rest
     } = req.body
 
     const recipeData = {
       ...rest,
       authorId: req.user.id,
+      prepTime,
+      cookTime,
     }
-
-    // Add time fields if provided (convert from snake_case)
-    if (prep_time !== undefined) recipeData.prepTime = prep_time
-    if (cook_time !== undefined) recipeData.cookTime = cook_time
 
     // Add English fields if provided
     if (titleEn) recipeData.titleEn = titleEn
@@ -250,16 +258,16 @@ router.put('/:id', authenticateToken, validate(recipeUpdateSchema), async (req, 
       instructionsEn,
       instructionsEs,
       media,
-      prep_time,
-      cook_time,
+      prepTime,
+      cookTime,
       ...rest
     } = req.body
 
     const updateData = { ...rest }
 
     // Add time fields if provided
-    if (prep_time !== undefined) updateData.prepTime = prep_time
-    if (cook_time !== undefined) updateData.cookTime = cook_time
+    if (prepTime !== undefined) updateData.prepTime = prepTime
+    if (cookTime !== undefined) updateData.cookTime = cookTime
 
     // Add language fields if provided
     if (titleEn !== undefined) updateData.titleEn = titleEn
