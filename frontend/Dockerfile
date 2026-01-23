@@ -10,6 +10,10 @@ COPY package-lock.json ./
 COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
 
+# Copy Backend Prisma schema and config for postinstall script
+COPY backend/prisma ./backend/prisma/
+COPY backend/prisma.config.mjs ./backend/
+
 # Install all monorepo dependencies
 # This installs dependencies for all workspaces (frontend, backend)
 RUN npm ci

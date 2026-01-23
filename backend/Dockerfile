@@ -8,11 +8,12 @@ WORKDIR /app/backend
 COPY package-lock.json ./package-lock.json
 COPY backend/package.json ./package.json
 
+# Copy Prisma schema and config
+COPY backend/prisma ./prisma/
+COPY backend/prisma.config.mjs ./
+
 # Install dependencies
 RUN npm ci
-
-# Copy Prisma schema first
-COPY backend/prisma/schema.prisma ./prisma/schema.prisma
 
 # Generate Prisma client
 RUN npx prisma generate

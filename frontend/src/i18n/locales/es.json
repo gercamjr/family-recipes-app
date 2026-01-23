@@ -162,7 +162,9 @@
     "required": "Este campo es obligatorio",
     "unauthorized": "No tienes permiso para realizar esta acción",
     "add": "Agregar",
-    "selectOption": "Selecciona una opción..."
+    "selectOption": "Selecciona una opción...",
+    "edit": "Editar",
+    "delete": "Eliminar"
   },
   "validation": {
     "required": "Este campo es obligatorio",
