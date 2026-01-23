@@ -36,13 +36,11 @@ const recipeSchema = z
           filename: z.string().optional(),
           size: z.number().optional(),
           mimeType: z.string().optional(),
-        })
+        }),
       )
       .optional(),
-    prepTime: z.number().int().min(0).optional(),
-    prep_time: z.union([z.number(), z.string().transform(Number)]).optional(),
-    cookTime: z.number().int().min(0).optional(),
-    cook_time: z.union([z.number(), z.string().transform(Number)]).optional(),
+    prepTime: z.union([z.number(), z.string().transform(Number)]).optional(),
+    cookTime: z.union([z.number(), z.string().transform(Number)]).optional(),
     servings: z.union([z.number().int().min(1), z.string().transform(Number)]).optional(),
     tags: z.array(z.string()).optional(),
     categories: z.array(z.string()).optional(),
@@ -57,7 +55,7 @@ const recipeSchema = z
     },
     {
       message: 'Recipe must have at least one complete language version (title, ingredients, and instructions)',
-    }
+    },
   )
 
 const recipeUpdateSchema = recipeSchema.partial()

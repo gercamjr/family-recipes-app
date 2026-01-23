@@ -36,8 +36,8 @@ const RecipeForm = () => {
       title: '',
       ingredients: [{ value: '' }],
       instructions: '',
-      prep_time: '',
-      cook_time: '',
+      prepTime: '',
+      cookTime: '',
       servings: 1,
       tags: [],
       category: '',
@@ -63,8 +63,8 @@ const RecipeForm = () => {
     if (isEdit && recipe) {
       // Determine which language data to load based on user preference or available data
       const lang = user?.languagePref || i18n?.language || 'en'
-      const hasEnglish = recipe.title_en
-      const hasSpanish = recipe.title_es
+      const hasEnglish = recipe.titleEn
+      const hasSpanish = recipe.titleEs
 
       // Load the preferred language if available, otherwise fall back
       let loadLanguage = lang
@@ -76,16 +76,16 @@ const RecipeForm = () => {
 
       setRecipeLanguage(loadLanguage)
 
-      const title = loadLanguage === 'en' ? recipe.title_en : recipe.title_es
-      const ingredients = loadLanguage === 'en' ? recipe.ingredients_en : recipe.ingredients_es
-      const instructions = loadLanguage === 'en' ? recipe.instructions_en : recipe.instructions_es
+      const title = loadLanguage === 'en' ? recipe.titleEn : recipe.titleEs
+      const ingredients = loadLanguage === 'en' ? recipe.ingredientsEn : recipe.ingredientsEs
+      const instructions = loadLanguage === 'en' ? recipe.instructionsEn : recipe.instructionsEs
 
       reset({
         title: title || '',
         ingredients: ingredients?.map((i) => ({ value: i })) || [{ value: '' }],
         instructions: instructions || '',
-        prep_time: recipe.prep_time,
-        cook_time: recipe.cook_time,
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
         servings: recipe.servings,
         tags: recipe.tags,
         category: recipe.categories?.[0] || '',
@@ -140,8 +140,8 @@ const RecipeForm = () => {
       // Map the single language fields to the appropriate language-specific fields
       const recipeData = {
         media: mediaToSave,
-        prep_time: data.prep_time,
-        cook_time: data.cook_time,
+        prepTime: data.prepTime,
+        cookTime: data.cookTime,
         servings: data.servings,
         tags: data.tags,
         categories: data.category ? [data.category] : [],
@@ -159,7 +159,7 @@ const RecipeForm = () => {
       }
 
       if (isEdit) {
-        await dispatch(updateRecipe({ id, ...recipeData })).unwrap()
+        await dispatch(updateRecipe({ id, recipeData })).unwrap()
         navigate(`/recipes/${id}`)
       } else {
         await dispatch(createRecipe(recipeData)).unwrap()
@@ -323,7 +323,7 @@ const RecipeForm = () => {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           <InputField
             label={t('recipes.prepTime')}
-            name='prep_time'
+            name='prepTime'
             type='number'
             register={register}
             errors={errors}
@@ -332,7 +332,7 @@ const RecipeForm = () => {
           />
           <InputField
             label={t('recipes.cookTime')}
-            name='cook_time'
+            name='cookTime'
             type='number'
             register={register}
             errors={errors}
