@@ -15,10 +15,29 @@ const app = express()
 app.use(helmet())
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? ['https://family-recipes-app-geracamodev.vercel.app', 'https://family-recipes-app.vercel.app']
-        : ['http://localhost:3000', 'http://localhost:5173'],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'https://family-recipes-app-geracamodev.vercel.app',
+        'https://family-recipes-app.vercel.app',
+        'https://family-recipes-app-blue.vercel.app',
+        'http://localhost:3000',
+        'http://localhost:5173',
+      ]
+
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true)
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        // Check if it's a vercel preview deployment
+        if (origin.endsWith('.vercel.app') && origin.includes('family-recipes-app')) {
+          return callback(null, true)
+        }
+
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.'
+        return callback(new Error(msg), false)
+      }
+      return callback(null, true)
+    },
     credentials: true,
   }),
 )
