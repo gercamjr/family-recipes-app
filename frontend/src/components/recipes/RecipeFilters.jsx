@@ -120,10 +120,10 @@ const RecipeFilters = () => {
                 key={tag}
                 type='button'
                 onClick={() => handleTagToggle(tag)}
-                className={`px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 border ${
                   selectedTags.includes(tag)
-                    ? 'bg-mint-cream text-space-cadet border-2 border-sea-green shadow-sm'
-                    : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-sea-green hover:text-sea-green'
+                    ? 'bg-sea-green text-white border-sea-green shadow-md transform scale-105'
+                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-mint-cream hover:text-sea-green hover:border-sea-green'
                 }`}
               >
                 {t(`tags.${tag.toLowerCase()}`)}
