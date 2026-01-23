@@ -84,7 +84,11 @@
     "titleEs": "Título (Español)",
     "category": "Categoría",
     "recipeLanguage": "Idioma de la Receta",
-    "languageHelp": "Elige el idioma para esta receta. Puedes agregar traducciones más tarde."
+    "languageHelp": "Elige el idioma para esta receta. Puedes agregar traducciones más tarde.",
+    "noTagsSelected": "No hay etiquetas seleccionadas",
+    "addTagPlaceholder": "Escribe una etiqueta y presiona Enter...",
+    "suggestedTags": "Etiquetas sugeridas:",
+    "filterByTags": "Filtrar por etiquetas"
   },
   "categories": {
     "breakfast": "Desayuno",

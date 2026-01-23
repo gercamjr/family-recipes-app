@@ -84,7 +84,11 @@
     "titleEs": "Title (Spanish)",
     "category": "Category",
     "recipeLanguage": "Recipe Language",
-    "languageHelp": "Choose the language for this recipe. You can add translations later."
+    "languageHelp": "Choose the language for this recipe. You can add translations later.",
+    "noTagsSelected": "No tags selected",
+    "addTagPlaceholder": "Type a tag and press Enter...",
+    "suggestedTags": "Suggested Tags:",
+    "filterByTags": "Filter by Tags"
   },
   "categories": {
     "breakfast": "Breakfast",
