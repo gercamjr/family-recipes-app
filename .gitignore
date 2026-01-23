@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # PDF files
 *.pdf
+
+.vercel
+.env*.local
