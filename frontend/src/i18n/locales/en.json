@@ -79,6 +79,7 @@
     "media": "Media (Images/Videos)",
     "addMedia": "Add Media",
     "mediaHelp": "You can add multiple images or videos for this recipe",
+    "dragDropHelp": "Drag and drop images or videos here, or click to select files",
     "titleEn": "Title (English)",
     "titleEs": "Title (Spanish)",
     "category": "Category",
