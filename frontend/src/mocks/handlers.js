@@ -30,7 +30,7 @@ export const handlers = [
 
   // Register
   http.post('*/api/auth/register', async ({ request }) => {
-    const { email, password, name } = await request.json()
+    const { email, name } = await request.json()
 
     return HttpResponse.json({
       user: {
