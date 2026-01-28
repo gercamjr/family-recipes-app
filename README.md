@@ -17,7 +17,7 @@ A secure, invite-only web app for family recipes with role-based access control,
 - **Backend**: Node.js 20+, Express.js, Prisma ORM, PostgreSQL, Passport.js + JWT
 - **Validation**: Zod schemas
 - **Storage**: Cloudinary for images/videos
-- **Testing**: Jest + Supertest (backend), Vitest + React Testing Library (frontend)
+- **Testing**: Jest + Supertest (backend), Vitest + React Testing Library + MSW (frontend)
 - **PWA**: vite-plugin-pwa with Workbox
 - **Deployment**: Vercel for full-stack hosting, GitHub Actions CI/CD
 
@@ -116,6 +116,34 @@ See `docs/software-development-plan.md` for detailed roadmap.
 - `npm run docker:up` - Start Docker development environment
 - `npm run docker:down` - Stop Docker containers
 - `npm run db:seed` - Seed the database with sample data
+
+## Testing
+
+The project uses a comprehensive testing strategy focusing on integration tests and user behavior. See the [Testing Documentation](docs/TESTING_README.md) for details.
+
+**Frontend Testing Quick Commands:**
+
+```bash
+cd frontend
+
+# Run tests in watch mode
+npm test
+
+# Run tests once (CI mode)
+npm run test:run
+
+# Run with coverage report
+npm run test:coverage
+
+# Run with UI
+npm run test:ui
+```
+
+**Key Testing Resources:**
+
+- [Testing Strategy](docs/TESTING_STRATEGY.md) - Philosophy and patterns
+- [Quick Reference](docs/TESTING_QUICK_REFERENCE.md) - Common patterns cheatsheet
+- [Migration Example](docs/TESTING_MIGRATION_EXAMPLE.md) - Refactoring guide
 
 ## Contributing
 
