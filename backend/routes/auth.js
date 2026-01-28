@@ -93,7 +93,7 @@ router.post(
       console.error('Registration error:', error)
       res.status(500).json({ error: 'Registration failed' })
     }
-  }
+  },
 )
 
 // @route   POST /api/auth/login
@@ -121,7 +121,7 @@ router.post('/login', validate(loginSchema), async (req, res) => {
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     })
 
