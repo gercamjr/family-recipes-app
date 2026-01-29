@@ -16,7 +16,7 @@ router.get('/pdf/:recipeId', optionalAuth, async (req, res) => {
       where: { id: recipeId },
       include: {
         author: {
-          select: { email: true },
+          select: { email: true, name: true },
         },
       },
     })
@@ -57,7 +57,7 @@ router.post('/email/:recipeId', authenticateToken, validate(emailShareSchema), a
       where: { id: recipeId },
       include: {
         author: {
-          select: { email: true },
+          select: { email: true, name: true },
         },
       },
     })

@@ -15,7 +15,7 @@ router.get('/', authenticateToken, async (req, res) => {
         recipe: {
           include: {
             author: {
-              select: { id: true, email: true },
+              select: { id: true, email: true, name: true },
             },
             _count: {
               select: { comments: true, favorites: true },

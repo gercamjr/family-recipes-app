@@ -43,6 +43,19 @@ export const handlers = [
     })
   }),
 
+  // Send invite
+  http.post('*/api/auth/invite', async ({ request }) => {
+    const { email } = await request.json()
+
+    if (!email) {
+      return HttpResponse.json({ error: 'Email is required' }, { status: 400 })
+    }
+
+    return HttpResponse.json({
+      message: 'Invitation sent successfully',
+    })
+  }),
+
   // Logout
   http.post('*/api/auth/logout', () => {
     return HttpResponse.json({ message: 'Logged out successfully' })
@@ -85,7 +98,7 @@ export const handlers = [
         servings: 4,
         category: 'Mexican',
         tags: ['dinner', 'mexican'],
-        author: { id: 1, email: 'test@example.com' },
+        author: { id: 1, email: 'test@example.com', name: 'Test User' },
         media: [],
         commentsCount: 0,
         favoritesCount: 0,
@@ -104,7 +117,7 @@ export const handlers = [
         servings: 6,
         category: 'Italian',
         tags: ['dinner', 'italian'],
-        author: { id: 1, email: 'test@example.com' },
+        author: { id: 1, email: 'test@example.com', name: 'Test User' },
         media: [],
         commentsCount: 0,
         favoritesCount: 0,
@@ -228,7 +241,7 @@ export const handlers = [
         {
           id: 1,
           content: 'Great recipe!',
-          author: { id: 2, name: 'Another User' },
+          author: { id: 2, email: 'another@example.com', name: 'Another User' },
           createdAt: new Date().toISOString(),
         },
       ],
@@ -244,7 +257,7 @@ export const handlers = [
         comment: {
           id: Date.now(),
           content,
-          author: { id: 1, name: 'Test User' },
+          author: { id: 1, email: 'test@example.com', name: 'Test User' },
           createdAt: new Date().toISOString(),
         },
       },

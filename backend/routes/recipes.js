@@ -40,7 +40,7 @@ router.get('/', optionalAuth, validateQuery(searchQuerySchema), async (req, res)
       where: whereClause,
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
         media: true,
         _count: {
@@ -105,13 +105,13 @@ router.get('/:id', optionalAuth, async (req, res) => {
       where: { id: parseInt(req.params.id) },
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
         media: true,
         comments: {
           include: {
             author: {
-              select: { id: true, email: true },
+              select: { id: true, email: true, name: true },
             },
           },
           orderBy: { createdAt: 'asc' },
@@ -214,7 +214,7 @@ router.post('/', authenticateToken, validate(recipeSchema), async (req, res) => 
       },
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
         media: true,
       },
@@ -300,7 +300,7 @@ router.put('/:id', authenticateToken, validate(recipeUpdateSchema), async (req, 
       data: updateData,
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
         media: true,
       },

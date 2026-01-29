@@ -9,6 +9,7 @@ import Register from './components/auth/Register'
 import RecipeForm from './components/recipes/RecipeForm'
 import RecipeDetail from './components/recipes/RecipeDetail'
 import ProtectedLayout from './components/ui/ProtectedLayout'
+import AdminInviteDashboard from './components/admin/AdminInviteDashboard'
 import './i18n'
 import './index.css'
 
@@ -30,6 +31,22 @@ const PublicRoute = ({ children }) => {
   }
 
   return children
+}
+
+// Admin Route component
+const AdminRoute = ({ children }) => {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
+  const userRole = useSelector((state) => state.auth.user?.role)
+
+  if (!isAuthenticated) {
+    return <Navigate to='/login' replace />
+  }
+
+  if (userRole !== 'admin') {
+    return <Navigate to='/' replace />
+  }
+
+  return <ProtectedLayout>{children}</ProtectedLayout>
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -88,6 +105,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <ProtectedRoute>
                 <App />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin/invites'
+            element={
+              <AdminRoute>
+                <AdminInviteDashboard />
+              </AdminRoute>
             }
           />
           <Route path='*' element={<Navigate to='/' replace />} />

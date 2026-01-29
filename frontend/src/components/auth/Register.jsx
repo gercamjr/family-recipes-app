@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAppDispatch, useAuth } from '../../store/hooks'
 import { registerStart, registerSuccess, registerFailure, clearError } from '../../store/slices/authSlice'
@@ -12,6 +12,7 @@ const Register = () => {
   const { t, i18n } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [searchParams] = useSearchParams()
 
   const {
     register,
@@ -19,6 +20,7 @@ const Register = () => {
     watch,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     defaultValues: {
       name: '',
@@ -30,6 +32,13 @@ const Register = () => {
   })
 
   const password = watch('password')
+
+  useEffect(() => {
+    const token = searchParams.get('token')
+    if (token) {
+      setValue('inviteToken', token, { shouldValidate: true })
+    }
+  }, [searchParams, setValue])
 
   const onSubmit = async (data) => {
     if (data.password !== data.confirmPassword) {

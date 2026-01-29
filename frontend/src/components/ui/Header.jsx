@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../store/slices/authSlice'
@@ -8,6 +9,7 @@ const Header = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
+  const isAdmin = user?.role === 'admin'
 
   const handleLogout = () => {
     dispatch(logout())
@@ -17,6 +19,14 @@ const Header = () => {
     <header className='bg-papaya p-4 flex justify-between items-center shadow-md'>
       <h1 className='text-2xl font-bold text-white'>{t('common.familyRecipes')}</h1>
       <div className='flex items-center'>
+        {isAdmin && (
+          <Link
+            to='/admin/invites'
+            className='text-white font-semibold mr-4 hover:text-sunglow transition-colors duration-300'
+          >
+            {t('admin.invites.navLabel')}
+          </Link>
+        )}
         {user && (
           <button
             onClick={handleLogout}

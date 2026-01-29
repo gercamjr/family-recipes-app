@@ -37,6 +37,15 @@ describe('Register Integration Tests', () => {
     })
   })
 
+  it('autofills invite token from url', () => {
+    renderWithProviders(<Register />, {
+      preloadedState: createUnauthenticatedState(),
+      route: '/register?token=invite-from-url',
+    })
+
+    expect(screen.getByLabelText(/invite.*token/i)).toHaveValue('invite-from-url')
+  })
+
   describe('Form Validation', () => {
     it('shows validation errors for empty form submission', async () => {
       const user = userEvent.setup()

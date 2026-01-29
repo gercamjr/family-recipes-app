@@ -43,7 +43,7 @@ describe('Comments Routes', () => {
           id: 1,
           content: 'Great recipe!',
           createdAt: '2025-10-03T14:32:38.533Z',
-          author: { id: 2, email: 'author@example.com' },
+          author: { id: 2, email: 'author@example.com', name: 'Author User' },
         },
       ]
 
@@ -58,7 +58,7 @@ describe('Comments Routes', () => {
         where: { recipeId: 1 },
         include: {
           author: {
-            select: { id: true, email: true },
+            select: { id: true, email: true, name: true },
           },
         },
         orderBy: { createdAt: 'asc' },
@@ -88,7 +88,7 @@ describe('Comments Routes', () => {
         content: 'Delicious!',
         recipeId: 1,
         authorId: 1,
-        author: { id: 1, email: 'test@example.com' },
+        author: { id: 1, email: 'test@example.com', name: 'Test User' },
       }
 
       prisma.recipe.findUnique.mockResolvedValue(mockRecipe)
@@ -106,7 +106,7 @@ describe('Comments Routes', () => {
         },
         include: {
           author: {
-            select: { id: true, email: true },
+            select: { id: true, email: true, name: true },
           },
         },
       })
@@ -129,7 +129,7 @@ describe('Comments Routes', () => {
       const updatedComment = {
         id: 1,
         content: 'Updated comment',
-        author: { id: 1, email: 'test@example.com' },
+        author: { id: 1, email: 'test@example.com', name: 'Test User' },
       }
 
       prisma.comment.findUnique.mockResolvedValue(mockComment)

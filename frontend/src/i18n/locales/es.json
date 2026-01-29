@@ -8,6 +8,19 @@
     "login": "Iniciar Sesión",
     "register": "Registrarse"
   },
+  "admin": {
+    "invites": {
+      "title": "Invitar usuarios",
+      "description": "Envía invitaciones por correo a nuevos familiares.",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "nombre@ejemplo.com",
+      "submit": "Enviar invitación",
+      "sending": "Enviando...",
+      "success": "Invitación enviada con éxito.",
+      "error": "No se pudo enviar la invitación.",
+      "navLabel": "Admin"
+    }
+  },
   "auth": {
     "logout": "Cerrar Sesión",
     "login": {
@@ -131,6 +144,7 @@
     "detail": {
       "ingredients": "Ingredientes",
       "instructions": "Instrucciones",
+      "author": "Por {{name}}",
       "share": "Compartir Receta",
       "print": "Imprimir",
       "downloadPdf": "Descargar PDF",

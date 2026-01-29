@@ -36,6 +36,16 @@ describe('Header Component', () => {
     expect(screen.getByText('auth.logout')).toBeInTheDocument()
   })
 
+  it('shows admin link for admin users', () => {
+    renderWithProviders(<Header />, {
+      preloadedState: createAuthenticatedState({
+        role: 'admin',
+      }),
+    })
+
+    expect(screen.getByText('admin.invites.navLabel')).toBeInTheDocument()
+  })
+
   it('dispatches logout action when logout button is clicked', async () => {
     const user = userEvent.setup()
 

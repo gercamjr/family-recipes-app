@@ -34,7 +34,7 @@ describe('Share Routes', () => {
       const mockRecipe = {
         id: 1,
         isPublic: true,
-        author: { email: 'author@example.com' },
+        author: { email: 'author@example.com', name: 'Author User' },
       }
 
       prisma.recipe.findUnique.mockResolvedValue(mockRecipe)
@@ -57,7 +57,7 @@ describe('Share Routes', () => {
       const mockRecipe = {
         id: 1,
         isPublic: true,
-        author: { email: 'author@example.com' },
+        author: { email: 'author@example.com', name: 'Author User' },
       }
 
       prisma.recipe.findUnique.mockResolvedValue(mockRecipe)
@@ -76,7 +76,7 @@ describe('Share Routes', () => {
       const mockRecipe = {
         id: 1,
         isPublic: true,
-        author: { email: 'author@example.com' },
+        author: { email: 'author@example.com', name: 'Author User' },
       }
 
       prisma.recipe.findUnique.mockResolvedValue(mockRecipe)

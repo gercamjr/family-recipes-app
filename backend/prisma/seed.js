@@ -39,6 +39,7 @@ async function main() {
     update: {},
     create: {
       email: 'admin@familyrecipes.com',
+      name: 'Admin User',
       passwordHash: adminPassword,
       role: 'admin',
       languagePref: 'en',
@@ -56,6 +57,7 @@ async function main() {
     update: {},
     create: {
       email: 'user@familyrecipes.com',
+      name: 'Recipe Editor',
       passwordHash: userPassword,
       role: 'editor',
       languagePref: 'en',
