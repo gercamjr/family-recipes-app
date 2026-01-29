@@ -56,7 +56,7 @@ router.post(
           email,
           name,
           passwordHash,
-          role: 'viewer', // Default role
+          role: 'editor', // Default role
           invitedById: inviter.id,
           languagePref,
         },

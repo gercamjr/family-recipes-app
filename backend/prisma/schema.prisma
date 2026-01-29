@@ -38,7 +38,7 @@ model User {
   email              String       @unique @db.VarChar(255)
   name               String       @db.VarChar(255)
   passwordHash       String       @map("password_hash") @db.VarChar(255)
-  role               Role         @default(viewer)
+  role               Role         @default(editor)
   languagePref       LanguagePref @default(en) @map("language_pref")
   isActive           Boolean      @default(true) @map("is_active")
   inviteToken        String?      @map("invite_token") @db.VarChar(255)

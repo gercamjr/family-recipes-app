@@ -15,7 +15,7 @@ const loginSchema = z.object({
 
 const inviteSchema = z.object({
   email: z.string().email('Invalid email format'),
-  role: z.enum(['admin', 'editor', 'viewer']).optional().default('viewer'),
+  role: z.enum(['admin', 'editor', 'viewer']).optional().default('editor'),
 })
 
 // Recipe validation schemas
