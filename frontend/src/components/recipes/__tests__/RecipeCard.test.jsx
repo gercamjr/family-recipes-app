@@ -53,7 +53,7 @@ const mockRecipe = {
   servings: 4,
   tags: ['tag1', 'tag2'],
   category: 'category1',
-  image_url: 'https://example.com/image.jpg',
+  media: [{ url: 'https://example.com/media.jpg', type: 'image' }],
   rating_avg: 4.5,
   created_at: '2023-01-01',
 }

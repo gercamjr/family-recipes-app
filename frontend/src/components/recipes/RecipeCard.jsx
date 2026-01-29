@@ -11,6 +11,10 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
   const isOwner = user?.id === recipe.author?.id
 
   const title = recipe.title
+  const imageUrl =
+    recipe.media?.find((media) => media?.type === 'image')?.url ||
+    recipe.image_url ||
+    'https://placehold.co//400x300'
 
   const handleFavoriteToggle = (e) => {
     e.stopPropagation()
@@ -40,7 +44,7 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
     >
       <div className='relative'>
         <img
-          src={recipe.image_url || 'https://placehold.co//400x300'}
+          src={imageUrl}
           alt={title}
           className='w-full h-56 object-cover'
           onError={(e) => {
