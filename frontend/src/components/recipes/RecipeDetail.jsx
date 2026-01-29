@@ -125,10 +125,11 @@ const RecipeDetail = () => {
         <div className='flex justify-between items-start mb-6'>
           <div>
             <h1 className='text-4xl font-bold text-gray-900 dark:text-white mb-2'>{title}</h1>
-            <div className='flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400'>
+            <div className='flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400'>
               <span>Prep: {recipe.prepTime} min</span>
               <span>Cook: {recipe.cookTime} min</span>
               <span>Servings: {recipe.servings}</span>
+              {recipe.author?.name && <span>{t('recipe.detail.author', { name: recipe.author.name })}</span>}
             </div>
           </div>
           <div className='flex space-x-2'>
@@ -257,7 +258,7 @@ const RecipeDetail = () => {
               <div key={comment.id} className='bg-gray-50 dark:bg-gray-800 p-4 rounded-lg'>
                 <div className='flex justify-between items-start'>
                   <div>
-                    <p className='font-medium text-gray-900 dark:text-white'>{comment.author.email}</p>
+                    <p className='font-medium text-gray-900 dark:text-white'>{comment.author.name || comment.author.email}</p>
                     <p className='text-gray-700 dark:text-gray-300'>{comment.content}</p>
                   </div>
                   <span className='text-sm text-gray-500'>{new Date(comment.createdAt).toLocaleDateString()}</span>

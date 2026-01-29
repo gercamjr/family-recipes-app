@@ -45,7 +45,7 @@ describe('Favorites Routes', () => {
             id: 1,
             titleEn: 'Test Recipe',
             _count: { comments: 2, favorites: 5 },
-            author: { id: 2, email: 'author@example.com' },
+            author: { id: 2, email: 'author@example.com', name: 'Author User' },
           },
         },
       ]
@@ -61,7 +61,7 @@ describe('Favorites Routes', () => {
           recipe: {
             include: {
               author: {
-                select: { id: true, email: true },
+                select: { id: true, email: true, name: true },
               },
               _count: {
                 select: { comments: true, favorites: true },

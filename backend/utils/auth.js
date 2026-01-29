@@ -55,6 +55,7 @@ const formatRecipeResponse = (recipe, language = 'en') => {
       ? {
           id: recipe.author.id,
           email: recipe.author.email,
+          name: recipe.author.name,
         }
       : null,
     media: recipe.media || [],

@@ -143,6 +143,7 @@ describe('Auth Routes', () => {
       const user = {
         id: 1,
         email: 'test@example.com',
+        name: 'Test User',
         passwordHash: 'hashedpassword',
         role: 'VIEWER',
         languagePref: 'en',
@@ -164,6 +165,7 @@ describe('Auth Routes', () => {
       expect(res.body.user).toEqual({
         id: user.id,
         email: user.email,
+        name: user.name,
         role: user.role,
         languagePref: user.languagePref,
       })

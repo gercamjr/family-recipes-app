@@ -53,6 +53,7 @@ const recipe = {
   author: {
     id: user.id,
     email: user.email,
+    name: user.name,
   },
   media: [
     {
@@ -194,7 +195,7 @@ describe('Recipes API', () => {
         },
         include: {
           author: {
-            select: { id: true, email: true },
+            select: { id: true, email: true, name: true },
           },
           media: true,
         },

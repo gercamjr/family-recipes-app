@@ -8,6 +8,19 @@
     "login": "Login",
     "register": "Register"
   },
+  "admin": {
+    "invites": {
+      "title": "Invite Users",
+      "description": "Send invitation emails to new family members.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "name@example.com",
+      "submit": "Send invite",
+      "sending": "Sending...",
+      "success": "Invitation sent successfully.",
+      "error": "Failed to send invitation.",
+      "navLabel": "Admin"
+    }
+  },
   "auth": {
     "logout": "Logout",
     "login": {
@@ -131,6 +144,7 @@
     "detail": {
       "ingredients": "Ingredients",
       "instructions": "Instructions",
+      "author": "By {{name}}",
       "share": "Share Recipe",
       "print": "Print",
       "downloadPdf": "Download PDF",

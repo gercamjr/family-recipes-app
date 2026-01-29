@@ -29,7 +29,7 @@ router.get('/:recipeId', async (req, res) => {
       where: { recipeId },
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
       },
       orderBy: { createdAt: 'asc' },
@@ -64,7 +64,7 @@ router.post('/:recipeId', authenticateToken, validate(commentSchema), async (req
       },
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
       },
     })
@@ -106,7 +106,7 @@ router.put('/:id', authenticateToken, validate(commentSchema), async (req, res) 
       data: { content },
       include: {
         author: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, name: true },
         },
       },
     })

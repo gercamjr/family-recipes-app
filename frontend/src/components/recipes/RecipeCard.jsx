@@ -75,6 +75,12 @@ const RecipeCard = ({ recipe, onEdit, onDelete, onView, onToggleFavorite }) => {
           {/* <span>{recipe.rating_avg || 'N/A'}</span>
           <span className='mx-2'>·</span> */}
           <span>{recipe.category}</span>
+          {recipe.author?.name && (
+            <>
+              <span className='mx-2'>·</span>
+              <span>{recipe.author.name}</span>
+            </>
+          )}
         </div>
         {recipe.tags && recipe.tags.length > 0 && (
           <div className='flex flex-wrap gap-2 mt-4'>
