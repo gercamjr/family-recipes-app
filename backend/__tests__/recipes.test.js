@@ -90,7 +90,7 @@ describe('Recipes API', () => {
       expect(prisma.recipe.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { isPublic: true },
-        })
+        }),
       )
     })
   })
@@ -107,11 +107,20 @@ describe('Recipes API', () => {
       expect(res.statusCode).toEqual(200)
       expect(res.body.recipes).toHaveLength(1)
       expect(res.body.recipes[0].title).toEqual(recipe.titleEn)
+      expect(res.body.pagination).toEqual({
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+      })
       expect(prisma.recipe.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { authorId: user.id },
-        })
+          take: 20,
+          skip: 0,
+        }),
       )
+      expect(prisma.recipe.count).toHaveBeenCalledWith({ where: { authorId: user.id } })
     })
 
     it('should return 401 if user is not authenticated', async () => {
@@ -237,7 +246,7 @@ describe('Recipes API', () => {
               create: mediaData,
             },
           }),
-        })
+        }),
       )
     })
 
@@ -301,7 +310,7 @@ describe('Recipes API', () => {
               create: newMedia,
             },
           }),
-        })
+        }),
       )
     })
 

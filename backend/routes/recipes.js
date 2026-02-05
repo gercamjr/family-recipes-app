@@ -1,7 +1,14 @@
 const express = require('express')
 const { authenticateToken, optionalAuth } = require('../middleware/auth')
 const { formatRecipeResponse } = require('../utils/auth')
-const { validate, validateQuery, recipeSchema, recipeUpdateSchema, searchQuerySchema } = require('../utils/validation')
+const {
+  validate,
+  validateQuery,
+  recipeSchema,
+  recipeUpdateSchema,
+  searchQuerySchema,
+  myRecipesQuerySchema,
+} = require('../utils/validation')
 const prisma = require('../lib/prisma')
 const router = express.Router()
 
@@ -74,22 +81,94 @@ router.get('/', optionalAuth, validateQuery(searchQuerySchema), async (req, res)
 // @route   GET /api/recipes/my
 // @desc    Get user's own recipes
 // @access  Private
-router.get('/my', authenticateToken, async (req, res) => {
+router.get('/my', authenticateToken, validateQuery(myRecipesQuerySchema), async (req, res) => {
   try {
+    const {
+      search,
+      category,
+      tags,
+      status = 'all',
+      sortBy = 'updatedAt',
+      sortDir = 'desc',
+      page = 1,
+      limit = 20,
+      language = req.user.languagePref || 'en',
+    } = req.query
+
+    const skip = (page - 1) * limit
+    const whereClause = { authorId: req.user.id }
+
+    if (status === 'public') {
+      whereClause.isPublic = true
+    }
+
+    if (status === 'private') {
+      whereClause.isPublic = false
+    }
+
+    if (search) {
+      const searchFields = language === 'es' ? ['titleEs', 'instructionsEs'] : ['titleEn', 'instructionsEn']
+
+      whereClause.OR = searchFields.map((field) => ({
+        [field]: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      }))
+    }
+
+    if (category) {
+      whereClause.categories = { has: category }
+    }
+
+    if (tags) {
+      const tagsArray = Array.isArray(tags) ? tags : [tags]
+      whereClause.tags = { hasSome: tagsArray }
+    }
+
+    const orderBy = (() => {
+      if (sortBy === 'title') {
+        const titleField = language === 'es' ? 'titleEs' : 'titleEn'
+        return { [titleField]: sortDir }
+      }
+
+      if (sortBy === 'favorites') {
+        return { favorites: { _count: sortDir } }
+      }
+
+      if (sortBy === 'comments') {
+        return { comments: { _count: sortDir } }
+      }
+
+      return { [sortBy]: sortDir }
+    })()
+
     const recipes = await prisma.recipe.findMany({
-      where: { authorId: req.user.id },
+      where: whereClause,
       include: {
         media: true,
         _count: {
           select: { comments: true, favorites: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
+      take: parseInt(limit),
+      skip: skip,
     })
 
-    const formattedRecipes = recipes.map((recipe) => formatRecipeResponse(recipe, req.user.languagePref))
+    const totalRecipes = await prisma.recipe.count({ where: whereClause })
 
-    res.json({ recipes: formattedRecipes })
+    const formattedRecipes = recipes.map((recipe) => formatRecipeResponse(recipe, language))
+
+    res.json({
+      recipes: formattedRecipes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: totalRecipes,
+        totalPages: Math.ceil(totalRecipes / limit),
+      },
+    })
   } catch (error) {
     console.error('Get my recipes error:', error)
     res.status(500).json({ error: 'Failed to fetch your recipes' })

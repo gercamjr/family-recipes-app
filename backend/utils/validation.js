@@ -81,6 +81,12 @@ const searchQuerySchema = z.object({
     .optional(),
 })
 
+const myRecipesQuerySchema = searchQuerySchema.extend({
+  sortBy: z.enum(['createdAt', 'updatedAt', 'title', 'favorites', 'comments']).optional(),
+  sortDir: z.enum(['asc', 'desc']).optional(),
+  status: z.enum(['all', 'public', 'private']).optional(),
+})
+
 // Email sharing validation
 const emailShareSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -134,6 +140,7 @@ module.exports = {
   recipeUpdateSchema,
   commentSchema,
   searchQuerySchema,
+  myRecipesQuerySchema,
   emailShareSchema,
   validate,
   validateQuery,
