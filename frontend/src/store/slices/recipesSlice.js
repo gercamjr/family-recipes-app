@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import {
   fetchRecipes,
+  fetchMyRecipes,
   fetchRecipeById,
   createRecipe,
   updateRecipe,
@@ -10,14 +11,23 @@ import {
 
 const initialState = {
   recipes: [],
+  myRecipes: [],
   currentRecipe: null,
   favorites: [],
   searchResults: [],
   loading: false,
+  myRecipesLoading: false,
   error: null,
+  myRecipesError: null,
   pagination: {
     page: 1,
     limit: 12,
+    total: 0,
+    totalPages: 0,
+  },
+  myRecipesPagination: {
+    page: 1,
+    limit: 20,
     total: 0,
     totalPages: 0,
   },
@@ -26,6 +36,16 @@ const initialState = {
     category: '',
     tags: [],
     language: 'en',
+  },
+  myRecipesFilters: {
+    search: '',
+    category: '',
+    tags: [],
+    status: 'all',
+    sortBy: 'updatedAt',
+    sortDir: 'desc',
+    page: 1,
+    limit: 20,
   },
 }
 
@@ -36,11 +56,20 @@ const recipesSlice = createSlice({
     updateFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload }
     },
+    updateMyRecipesFilters: (state, action) => {
+      state.myRecipesFilters = { ...state.myRecipesFilters, ...action.payload }
+    },
     clearFilters: (state) => {
       state.filters = initialState.filters
     },
+    clearMyRecipesFilters: (state) => {
+      state.myRecipesFilters = initialState.myRecipesFilters
+    },
     clearError: (state) => {
       state.error = null
+    },
+    clearMyRecipesError: (state) => {
+      state.myRecipesError = null
     },
     resetCurrentRecipe: (state) => {
       state.currentRecipe = null
@@ -62,6 +91,21 @@ const recipesSlice = createSlice({
       .addCase(fetchRecipes.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+      })
+      // Fetch my recipes
+      .addCase(fetchMyRecipes.pending, (state) => {
+        state.myRecipesLoading = true
+        state.myRecipesError = null
+      })
+      .addCase(fetchMyRecipes.fulfilled, (state, action) => {
+        state.myRecipesLoading = false
+        state.myRecipes = action.payload.recipes
+        state.myRecipesPagination = action.payload.pagination
+        state.myRecipesError = null
+      })
+      .addCase(fetchMyRecipes.rejected, (state, action) => {
+        state.myRecipesLoading = false
+        state.myRecipesError = action.payload
       })
       // Fetch recipe by ID
       .addCase(fetchRecipeById.pending, (state) => {
@@ -104,6 +148,10 @@ const recipesSlice = createSlice({
         if (index !== -1) {
           state.recipes[index] = action.payload.recipe
         }
+        const myIndex = state.myRecipes.findIndex((r) => r.id === action.payload.recipe.id)
+        if (myIndex !== -1) {
+          state.myRecipes[myIndex] = action.payload.recipe
+        }
         state.error = null
       })
       .addCase(updateRecipe.rejected, (state, action) => {
@@ -118,6 +166,7 @@ const recipesSlice = createSlice({
       .addCase(deleteRecipe.fulfilled, (state, action) => {
         state.loading = false
         state.recipes = state.recipes.filter((r) => r.id !== action.payload)
+        state.myRecipes = state.myRecipes.filter((r) => r.id !== action.payload)
         state.error = null
       })
       .addCase(deleteRecipe.rejected, (state, action) => {
@@ -143,6 +192,14 @@ const recipesSlice = createSlice({
   },
 })
 
-export const { updateFilters, clearFilters, clearError, resetCurrentRecipe } = recipesSlice.actions
+export const {
+  updateFilters,
+  updateMyRecipesFilters,
+  clearFilters,
+  clearMyRecipesFilters,
+  clearError,
+  clearMyRecipesError,
+  resetCurrentRecipe,
+} = recipesSlice.actions
 
 export default recipesSlice.reducer

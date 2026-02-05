@@ -21,6 +21,16 @@ export const recipesService = {
     }
   },
 
+  // Get user's recipes with filters/sorting/pagination
+  async getMyRecipes(params = {}) {
+    try {
+      const response = await api.get('/recipes/my', { params })
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch your recipes')
+    }
+  },
+
   // Create new recipe
   async createRecipe(recipeData) {
     try {

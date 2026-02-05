@@ -8,6 +8,7 @@ import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import RecipeForm from './components/recipes/RecipeForm'
 import RecipeDetail from './components/recipes/RecipeDetail'
+import MyRecipesTable from './components/recipes/MyRecipesTable'
 import ProtectedLayout from './components/ui/ProtectedLayout'
 import AdminInviteDashboard from './components/admin/AdminInviteDashboard'
 import './i18n'
@@ -100,6 +101,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             }
           />
           <Route
+            path='/my-recipes'
+            element={
+              <ProtectedRoute>
+                <MyRecipesTable />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path='/'
             element={
               <ProtectedRoute>
@@ -119,7 +128,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </Routes>
       </Router>
     </Provider>
-  </React.StrictMode>
+  </React.StrictMode>,
 )
 
 // Register Service Worker for PWA (only in production)

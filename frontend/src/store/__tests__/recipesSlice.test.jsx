@@ -4,14 +4,23 @@ import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, toggleFavorite 
 describe('recipesSlice', () => {
   const initialState = {
     recipes: [],
+    myRecipes: [],
     currentRecipe: null,
     favorites: [],
     searchResults: [],
     loading: false,
+    myRecipesLoading: false,
     error: null,
+    myRecipesError: null,
     pagination: {
       page: 1,
       limit: 12,
+      total: 0,
+      totalPages: 0,
+    },
+    myRecipesPagination: {
+      page: 1,
+      limit: 20,
       total: 0,
       totalPages: 0,
     },
@@ -20,6 +29,16 @@ describe('recipesSlice', () => {
       category: '',
       tags: [],
       language: 'en',
+    },
+    myRecipesFilters: {
+      search: '',
+      category: '',
+      tags: [],
+      status: 'all',
+      sortBy: 'updatedAt',
+      sortDir: 'desc',
+      page: 1,
+      limit: 20,
     },
   }
 

@@ -19,6 +19,14 @@ const Header = () => {
     <header className='bg-papaya p-4 flex justify-between items-center shadow-md'>
       <h1 className='text-2xl font-bold text-white'>{t('common.familyRecipes')}</h1>
       <div className='flex items-center'>
+        {user && (
+          <Link
+            to='/my-recipes'
+            className='text-white font-semibold mr-4 hover:text-sunglow transition-colors duration-300'
+          >
+            {t('recipes.myRecipesNav')}
+          </Link>
+        )}
         {isAdmin && (
           <Link
             to='/admin/invites'

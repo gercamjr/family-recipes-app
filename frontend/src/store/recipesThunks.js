@@ -11,6 +11,16 @@ export const fetchRecipes = createAsyncThunk('recipes/fetchRecipes', async (para
   }
 })
 
+// Fetch current user's recipes with pagination and filters
+export const fetchMyRecipes = createAsyncThunk('recipes/fetchMyRecipes', async (params = {}, { rejectWithValue }) => {
+  try {
+    const response = await recipesService.getMyRecipes(params)
+    return response
+  } catch (error) {
+    return rejectWithValue(error.message)
+  }
+})
+
 // Fetch single recipe by ID
 export const fetchRecipeById = createAsyncThunk('recipes/fetchRecipeById', async (id, { rejectWithValue }) => {
   try {
@@ -41,7 +51,7 @@ export const updateRecipe = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
-  }
+  },
 )
 
 // Delete recipe
@@ -65,7 +75,7 @@ export const toggleFavorite = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
-  }
+  },
 )
 
 // Fetch comments for a recipe
@@ -88,5 +98,5 @@ export const addComment = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
-  }
+  },
 )

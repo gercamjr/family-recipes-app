@@ -185,6 +185,152 @@ export const handlers = [
     })
   }),
 
+  // Get user's recipes
+  http.get('*/api/recipes/my', ({ request }) => {
+    const url = new URL(request.url)
+    const search = url.searchParams.get('search')
+    const category = url.searchParams.get('category')
+    const status = url.searchParams.get('status') || 'all'
+    const sortBy = url.searchParams.get('sortBy') || 'updatedAt'
+    const sortDir = url.searchParams.get('sortDir') || 'desc'
+    const language = url.searchParams.get('language') || 'en'
+    const page = Number(url.searchParams.get('page') || 1)
+    const limit = Number(url.searchParams.get('limit') || 20)
+    const tags = url.searchParams.getAll('tags')
+
+    let recipes = [
+      {
+        id: 1,
+        titleEn: 'Tacos',
+        titleEs: 'Tacos',
+        ingredientsEn: ['Tortillas', 'Beef', 'Cheese'],
+        ingredientsEs: ['Tortillas', 'Carne', 'Queso'],
+        instructionsEn: 'Cook and assemble',
+        instructionsEs: 'Cocinar y ensamblar',
+        prepTime: 15,
+        cookTime: 20,
+        servings: 4,
+        categories: ['Dinner'],
+        tags: ['Quick', 'Spicy'],
+        isPublic: true,
+        author: { id: 1, email: 'test@example.com', name: 'Test User' },
+        media: [
+          {
+            id: 10,
+            url: 'https://example.com/tacos.jpg',
+            type: 'image',
+            filename: 'tacos.jpg',
+            size: 12345,
+            mimeType: 'image/jpeg',
+            recipeId: 1,
+          },
+        ],
+        commentsCount: 2,
+        favoritesCount: 5,
+        createdAt: new Date('2025-01-01').toISOString(),
+        updatedAt: new Date('2025-01-10').toISOString(),
+      },
+      {
+        id: 2,
+        titleEn: 'Pizza',
+        titleEs: 'Pizza',
+        ingredientsEn: ['Dough', 'Sauce', 'Cheese'],
+        ingredientsEs: ['Masa', 'Salsa', 'Queso'],
+        instructionsEn: 'Bake at 450°F',
+        instructionsEs: 'Hornear a 230°C',
+        prepTime: 30,
+        cookTime: 15,
+        servings: 6,
+        categories: ['Dinner'],
+        tags: ['Easy', 'Vegetarian'],
+        isPublic: false,
+        author: { id: 1, email: 'test@example.com', name: 'Test User' },
+        media: [
+          {
+            id: 11,
+            url: 'https://example.com/pizza.jpg',
+            type: 'image',
+            filename: 'pizza.jpg',
+            size: 23456,
+            mimeType: 'image/jpeg',
+            recipeId: 2,
+          },
+        ],
+        commentsCount: 1,
+        favoritesCount: 3,
+        createdAt: new Date('2025-01-02').toISOString(),
+        updatedAt: new Date('2025-01-12').toISOString(),
+      },
+    ]
+
+    if (status === 'public') {
+      recipes = recipes.filter((recipe) => recipe.isPublic)
+    }
+
+    if (status === 'private') {
+      recipes = recipes.filter((recipe) => !recipe.isPublic)
+    }
+
+    if (search) {
+      const searchField = language === 'es' ? 'titleEs' : 'titleEn'
+      recipes = recipes.filter((recipe) => recipe[searchField].toLowerCase().includes(search.toLowerCase()))
+    }
+
+    if (category) {
+      recipes = recipes.filter((recipe) => recipe.categories?.includes(category))
+    }
+
+    if (tags.length > 0) {
+      recipes = recipes.filter((recipe) => tags.some((tag) => recipe.tags?.includes(tag)))
+    }
+
+    const sortedRecipes = recipes.sort((a, b) => {
+      const direction = sortDir === 'asc' ? 1 : -1
+      if (sortBy === 'title') {
+        const field = language === 'es' ? 'titleEs' : 'titleEn'
+        return a[field].localeCompare(b[field]) * direction
+      }
+      if (sortBy === 'favorites') {
+        return (a.favoritesCount - b.favoritesCount) * direction
+      }
+      if (sortBy === 'comments') {
+        return (a.commentsCount - b.commentsCount) * direction
+      }
+      return (new Date(a[sortBy]) - new Date(b[sortBy])) * direction
+    })
+
+    const pagedRecipes = sortedRecipes.slice((page - 1) * limit, page * limit)
+
+    const formattedRecipes = pagedRecipes.map((recipe) => ({
+      id: recipe.id,
+      title: language === 'es' ? recipe.titleEs : recipe.titleEn,
+      ingredients: language === 'es' ? recipe.ingredientsEs : recipe.ingredientsEn,
+      instructions: language === 'es' ? recipe.instructionsEs : recipe.instructionsEn,
+      prepTime: recipe.prepTime,
+      cookTime: recipe.cookTime,
+      servings: recipe.servings,
+      categories: recipe.categories,
+      tags: recipe.tags,
+      isPublic: recipe.isPublic,
+      author: recipe.author,
+      media: recipe.media,
+      commentsCount: recipe.commentsCount,
+      favoritesCount: recipe.favoritesCount,
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt,
+    }))
+
+    return HttpResponse.json({
+      recipes: formattedRecipes,
+      pagination: {
+        page,
+        limit,
+        total: recipes.length,
+        totalPages: Math.ceil(recipes.length / limit) || 1,
+      },
+    })
+  }),
+
   // Get single recipe
   http.get('*/api/recipes/:id', ({ params }) => {
     const id = parseInt(params.id)
