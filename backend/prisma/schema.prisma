@@ -65,7 +65,7 @@ model Comment {
 
   author   User   @relation("UserComments", fields: [authorId], references: [id])
   authorId Int    @map("user_id")
-  recipe   Recipe @relation("RecipeComments", fields: [recipeId], references: [id])
+  recipe   Recipe @relation("RecipeComments", fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId Int    @map("recipe_id")
 
   @@map("comments")
@@ -77,7 +77,7 @@ model Favorite {
 
   user     User   @relation("UserFavorites", fields: [userId], references: [id])
   userId   Int    @map("user_id")
-  recipe   Recipe @relation("RecipeFavorites", fields: [recipeId], references: [id])
+  recipe   Recipe @relation("RecipeFavorites", fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId Int    @map("recipe_id")
 
   @@unique([recipeId, userId])
@@ -92,7 +92,7 @@ model Media {
   size     Int?    @map("size")
   mimeType String? @map("mimeType")
 
-  recipe   Recipe @relation("RecipeMedia", fields: [recipeId], references: [id])
+  recipe   Recipe @relation("RecipeMedia", fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId Int    @map("recipeId")
 
   @@map("media")

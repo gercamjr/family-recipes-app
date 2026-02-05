@@ -340,6 +340,7 @@ describe('Recipes API', () => {
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({ message: 'Recipe deleted successfully' })
+      expect(prisma.recipe.delete).toHaveBeenCalledWith({ where: { id: recipe.id } })
     })
 
     it('should return 403 if user is not the author or an admin', async () => {
