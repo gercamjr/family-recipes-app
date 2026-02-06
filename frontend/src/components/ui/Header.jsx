@@ -17,8 +17,18 @@ const Header = () => {
 
   return (
     <header className='bg-papaya p-4 flex justify-between items-center shadow-md'>
-      <h1 className='text-2xl font-bold text-white'>{t('common.familyRecipes')}</h1>
+      <Link to='/' className='text-2xl font-bold text-white hover:text-sunglow transition-colors duration-300'>
+        {t('common.familyRecipes')}
+      </Link>
       <div className='flex items-center'>
+        {user && (
+          <Link
+            to='/'
+            className='text-white font-semibold mr-4 hover:text-sunglow transition-colors duration-300'
+          >
+            {t('recipes.allRecipesNav')}
+          </Link>
+        )}
         {user && (
           <Link
             to='/my-recipes'

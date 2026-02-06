@@ -65,6 +65,7 @@
   "recipes": {
     "sampleRecipe": "Receta de Ejemplo",
     "recipeImage": "Imagen de Receta",
+    "allRecipesNav": "Todas las Recetas",
     "myRecipesNav": "Mis Recetas",
     "myRecipesTitle": "Mis Recetas",
     "myRecipesSubtitle": "Administra y organiza tus recetas",
