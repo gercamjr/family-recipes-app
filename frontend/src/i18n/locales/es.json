@@ -190,5 +190,35 @@
     "email": "Ingresa un correo electrónico válido",
     "minLength": "Debe tener al menos {{count}} caracteres",
     "maxLength": "No puede tener más de {{count}} caracteres"
+  },
+  "imageUpload": {
+    "title": "Subir Imagen de Receta",
+    "subtitle": "Sube una imagen para extraer los detalles de la receta",
+    "dragDropText": "Arrastra y suelta tu imagen aquí",
+    "orText": "o",
+    "browseFiles": "Explorar Archivos",
+    "supportedFormats": "Formatos admitidos: JPG, PNG, PDF",
+    "maxSize": "Tamaño máximo: 10MB",
+    "uploading": "Subiendo...",
+    "uploadSuccess": "¡Imagen subida con éxito!",
+    "uploadError": "Error al subir la imagen. Por favor, inténtalo de nuevo.",
+    "removeFile": "Eliminar archivo",
+    "preview": "Vista previa de la imagen",
+    "pdfFile": "Documento PDF",
+    "uploadAnother": "Subir Otra Imagen",
+    "uploadButton": "Subir Imagen",
+    "progress": "Progreso de subida",
+    "errors": {
+      "invalidType": "Tipo de archivo no válido. Por favor, sube un archivo JPG, PNG o PDF.",
+      "tooLarge": "El archivo es demasiado grande. El tamaño máximo es 10MB.",
+      "uploadFailed": "Error al subir. Por favor, comprueba tu conexión e inténtalo de nuevo.",
+      "noFile": "Por favor, selecciona un archivo para subir."
+    },
+    "status": {
+      "idle": "Listo para subir",
+      "uploading": "Subiendo imagen...",
+      "success": "Subida completa",
+      "error": "Error en la subida"
+    }
   }
 }

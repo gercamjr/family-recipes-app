@@ -190,5 +190,35 @@
     "email": "Please enter a valid email",
     "minLength": "Must be at least {{count}} characters",
     "maxLength": "Cannot be more than {{count}} characters"
+  },
+  "imageUpload": {
+    "title": "Upload Recipe Image",
+    "subtitle": "Upload an image to extract recipe details",
+    "dragDropText": "Drag and drop your image here",
+    "orText": "or",
+    "browseFiles": "Browse Files",
+    "supportedFormats": "Supported formats: JPG, PNG, PDF",
+    "maxSize": "Maximum file size: 10MB",
+    "uploading": "Uploading...",
+    "uploadSuccess": "Image uploaded successfully!",
+    "uploadError": "Failed to upload image. Please try again.",
+    "removeFile": "Remove file",
+    "preview": "Image preview",
+    "pdfFile": "PDF document",
+    "uploadAnother": "Upload Another Image",
+    "uploadButton": "Upload Image",
+    "progress": "Upload progress",
+    "errors": {
+      "invalidType": "Invalid file type. Please upload a JPG, PNG, or PDF file.",
+      "tooLarge": "File is too large. Maximum size is 10MB.",
+      "uploadFailed": "Upload failed. Please check your connection and try again.",
+      "noFile": "Please select a file to upload."
+    },
+    "status": {
+      "idle": "Ready to upload",
+      "uploading": "Uploading image...",
+      "success": "Upload complete",
+      "error": "Upload failed"
+    }
   }
 }
