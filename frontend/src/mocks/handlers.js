@@ -336,6 +336,19 @@ export const handlers = [
     })
   }),
 
+  // OCR image upload
+  http.post('*/api/recipes/ocr', async () => {
+    return HttpResponse.json({
+      url: 'https://cloudinary.example.com/mock-ocr-image.jpg',
+      publicId: 'family-recipes/ocr/mock-ocr-id',
+      filename: 'recipe.jpg',
+      size: 102400,
+      mimeType: 'image/jpeg',
+      type: 'image',
+      ocrData: null,
+    })
+  }),
+
   // ============================================
   // Share Endpoints
   // ============================================

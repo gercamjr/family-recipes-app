@@ -73,6 +73,7 @@ app.use('/api/comments', require('./routes/comments'))
 app.use('/api/favorites', require('./routes/favorites'))
 app.use('/api/upload', require('./routes/upload'))
 app.use('/api/share', require('./routes/share'))
+app.use('/api/recipes/ocr', require('./routes/ocr'))
 
 // 404 handler
 app.use('/api/*', (req, res) => {
