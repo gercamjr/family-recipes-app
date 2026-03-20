@@ -1,8 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
-import { http, HttpResponse } from 'msw'
-import { server } from '../../../mocks/server'
 import RecipeImageUpload from '../RecipeImageUpload'
 import api from '../../../services/api'
 
