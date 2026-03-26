@@ -218,11 +218,120 @@ async function main() {
     },
   ]
 
+  const createdRecipes = []
   for (const recipeData of recipes) {
     const recipe = await prisma.recipe.create({
       data: recipeData,
     })
     console.log('✅ Recipe created:', recipe.titleEn)
+    createdRecipes.push(recipe)
+  }
+
+  // Seed RecipeImages with OCR results and processing logs
+  const sampleImages = [
+    {
+      filename: 'chocolate-cake-recipe.jpg',
+      originalUrl: 'https://res.cloudinary.com/sample/image/upload/family-recipes/ocr/chocolate-cake-recipe.jpg',
+      cloudinaryPublicId: 'family-recipes/ocr/chocolate-cake-recipe',
+      mimeType: 'image/jpeg',
+      size: 204800,
+      status: 'completed',
+      recipeId: createdRecipes[0].id,
+      userId: admin.id,
+    },
+    {
+      filename: 'tortilla-recipe.jpg',
+      originalUrl: 'https://res.cloudinary.com/sample/image/upload/family-recipes/ocr/tortilla-recipe.jpg',
+      cloudinaryPublicId: 'family-recipes/ocr/tortilla-recipe',
+      mimeType: 'image/jpeg',
+      size: 153600,
+      status: 'completed',
+      recipeId: createdRecipes[1].id,
+      userId: regularUser.id,
+    },
+    {
+      filename: 'pending-upload.png',
+      originalUrl: 'https://res.cloudinary.com/sample/image/upload/family-recipes/ocr/pending-upload.png',
+      cloudinaryPublicId: 'family-recipes/ocr/pending-upload',
+      mimeType: 'image/png',
+      size: 307200,
+      status: 'pending',
+      recipeId: null,
+      userId: admin.id,
+    },
+  ]
+
+  const createdImages = []
+  for (const imageData of sampleImages) {
+    const image = await prisma.recipeImage.create({ data: imageData })
+    console.log('✅ RecipeImage created:', image.filename, '| status:', image.status)
+    createdImages.push(image)
+  }
+
+  // Seed OcrResults for completed images
+  const ocrResultsData = [
+    {
+      recipeImageId: createdImages[0].id,
+      rawText:
+        'Chocolate Cake\n2 cups flour\n1 cup sugar\n1/2 cup cocoa\nMix all ingredients. Bake at 350F for 30 minutes.',
+      confidence: 0.97,
+      detectedLanguage: 'en',
+      parsedTitle: 'Chocolate Cake',
+      parsedIngredients: ['2 cups flour', '1 cup sugar', '1/2 cup cocoa'],
+      parsedInstructions: 'Mix all ingredients. Bake at 350F for 30 minutes.',
+      isManuallyEdited: false,
+    },
+    {
+      recipeImageId: createdImages[1].id,
+      rawText:
+        'Tortilla Española\n4 papas\n6 huevos\nAceite de oliva\nCocinar a fuego medio 20 minutos.',
+      confidence: 0.94,
+      detectedLanguage: 'es',
+      parsedTitle: 'Tortilla Española',
+      parsedIngredients: ['4 papas', '6 huevos', 'Aceite de oliva'],
+      parsedInstructions: 'Cocinar a fuego medio 20 minutos.',
+      isManuallyEdited: true,
+      editedAt: new Date(),
+      editedById: regularUser.id,
+    },
+  ]
+
+  for (const ocrData of ocrResultsData) {
+    const ocrResult = await prisma.ocrResult.create({ data: ocrData })
+    console.log('✅ OcrResult created for image:', ocrResult.recipeImageId, '| language:', ocrResult.detectedLanguage)
+  }
+
+  // Seed OcrProcessingLogs
+  const processingLogsData = [
+    {
+      recipeImageId: createdImages[0].id,
+      userId: admin.id,
+      status: 'completed',
+      processingTimeMs: 1230,
+      errorMessage: null,
+      apiCost: 0.0015,
+    },
+    {
+      recipeImageId: createdImages[1].id,
+      userId: regularUser.id,
+      status: 'completed',
+      processingTimeMs: 980,
+      errorMessage: null,
+      apiCost: 0.0015,
+    },
+    {
+      recipeImageId: createdImages[0].id,
+      userId: admin.id,
+      status: 'failed',
+      processingTimeMs: 5001,
+      errorMessage: 'Google Vision API timeout',
+      apiCost: null,
+    },
+  ]
+
+  for (const logData of processingLogsData) {
+    const log = await prisma.ocrProcessingLog.create({ data: logData })
+    console.log('✅ OcrProcessingLog created:', log.id, '| status:', log.status)
   }
 
   console.log('🎉 Database seeding completed!')
