@@ -3,7 +3,9 @@ const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 const cookieParser = require('cookie-parser')
+const multer = require('multer')
 const path = require('path')
+const { AppError, ErrorCodes, formatErrorResponse } = require('./utils/errors')
 
 // Load environment variables from root .env.local if available (dev), then .env
 require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') })
@@ -83,6 +85,22 @@ app.use('/api/*', (req, res) => {
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
+  // Handle Multer file upload errors
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      const appErr = new AppError(ErrorCodes.IMAGE_TOO_LARGE)
+      return res.status(appErr.status).json(formatErrorResponse(appErr))
+    }
+    const appErr = new AppError(ErrorCodes.INVALID_INPUT, err.message)
+    return res.status(appErr.status).json(formatErrorResponse(appErr))
+  }
+
+  // Handle known application errors
+  if (err instanceof AppError) {
+    return res.status(err.status).json(formatErrorResponse(err))
+  }
+
+  // Unknown errors
   console.error(err.stack)
   res.status(500).json({
     error: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : err.message,
