@@ -214,6 +214,20 @@
       "uploadFailed": "Upload failed. Please check your connection and try again.",
       "noFile": "Please select a file to upload."
     },
+    "errorCodes": {
+      "IMAGE_TOO_LARGE": "The uploaded file exceeds the maximum allowed size of 10MB.",
+      "INVALID_FILE_TYPE": "Invalid file type. Only JPG, PNG, and PDF files are accepted.",
+      "OCR_PROCESSING_FAILED": "OCR processing failed. Please try uploading a clearer image.",
+      "API_QUOTA_EXCEEDED": "OCR service is temporarily unavailable. Please try again later.",
+      "DATABASE_ERROR": "A server error occurred. Please try again.",
+      "NETWORK_TIMEOUT": "The request timed out. Please check your connection and try again.",
+      "CORRUPTED_FILE": "The uploaded file appears to be corrupted. Please try a different file.",
+      "POOR_IMAGE_QUALITY": "Image quality is too low for text extraction. Please upload a clearer image.",
+      "UPLOAD_FAILED": "Failed to upload the file. Please try again.",
+      "JOB_NOT_FOUND": "OCR job not found. It may have expired.",
+      "JOB_NOT_COMPLETE": "OCR processing is still in progress. Please wait.",
+      "INVALID_INPUT": "Invalid input provided. Please check your file and try again."
+    },
     "status": {
       "idle": "Ready to upload",
       "uploading": "Uploading image...",

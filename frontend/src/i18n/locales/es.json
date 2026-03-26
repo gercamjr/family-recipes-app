@@ -214,6 +214,20 @@
       "uploadFailed": "Error al subir. Por favor, comprueba tu conexión e inténtalo de nuevo.",
       "noFile": "Por favor, selecciona un archivo para subir."
     },
+    "errorCodes": {
+      "IMAGE_TOO_LARGE": "El archivo subido supera el tamaño máximo permitido de 10MB.",
+      "INVALID_FILE_TYPE": "Tipo de archivo no válido. Solo se aceptan archivos JPG, PNG y PDF.",
+      "OCR_PROCESSING_FAILED": "El procesamiento OCR falló. Por favor, intenta subir una imagen más clara.",
+      "API_QUOTA_EXCEEDED": "El servicio OCR no está disponible temporalmente. Por favor, inténtalo más tarde.",
+      "DATABASE_ERROR": "Ocurrió un error en el servidor. Por favor, inténtalo de nuevo.",
+      "NETWORK_TIMEOUT": "La solicitud expiró. Por favor, comprueba tu conexión e inténtalo de nuevo.",
+      "CORRUPTED_FILE": "El archivo subido parece estar dañado. Por favor, intenta con otro archivo.",
+      "POOR_IMAGE_QUALITY": "La calidad de la imagen es demasiado baja para extraer texto. Por favor, sube una imagen más clara.",
+      "UPLOAD_FAILED": "No se pudo subir el archivo. Por favor, inténtalo de nuevo.",
+      "JOB_NOT_FOUND": "El proceso OCR no fue encontrado. Puede haber expirado.",
+      "JOB_NOT_COMPLETE": "El procesamiento OCR aún está en curso. Por favor, espera.",
+      "INVALID_INPUT": "Entrada no válida. Por favor, verifica tu archivo e inténtalo de nuevo."
+    },
     "status": {
       "idle": "Listo para subir",
       "uploading": "Subiendo imagen...",

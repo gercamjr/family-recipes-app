@@ -7,6 +7,8 @@ const vision = require('@google-cloud/vision')
 const sharp = require('sharp')
 const rateLimit = require('express-rate-limit')
 const { authenticateToken } = require('../middleware/auth')
+const { ErrorCodes, AppError, formatErrorResponse, isQuotaExceededError, isTimeoutError } = require('../utils/errors')
+const { retryWithBackoff } = require('../utils/retry')
 const router = express.Router()
 
 // Configure Cloudinary
@@ -52,9 +54,28 @@ const upload = multer({
     if (allowedMimeTypes.includes(file.mimetype)) {
       return cb(null, true)
     }
-    cb(new Error('Invalid file type. Only JPG, PNG, and PDF files are allowed.'))
+    cb(new AppError(ErrorCodes.INVALID_FILE_TYPE))
   },
 })
+
+/**
+ * Middleware that converts Multer errors into structured AppError responses.
+ * Must be used after multer middleware in the route handler chain.
+ */
+function handleMulterError(err, req, res, next) {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      const appErr = new AppError(ErrorCodes.IMAGE_TOO_LARGE)
+      return res.status(appErr.status).json(formatErrorResponse(appErr))
+    }
+    const appErr = new AppError(ErrorCodes.INVALID_INPUT, err.message)
+    return res.status(appErr.status).json(formatErrorResponse(appErr))
+  }
+  if (err instanceof AppError) {
+    return res.status(err.status).json(formatErrorResponse(err))
+  }
+  next(err)
+}
 
 // Create Google Vision client from env credentials
 function createVisionClient() {
@@ -169,19 +190,54 @@ async function processImageWithOCR(imageId, imageBuffer, mimeType) {
     // Pre-process image with Sharp (skip for PDFs)
     let processedBuffer = imageBuffer
     if (mimeType !== 'application/pdf') {
-      processedBuffer = await sharp(imageBuffer)
-        .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
-        .flatten({ background: { r: 255, g: 255, b: 255 } }) // fill transparency with white
-        .jpeg({ quality: 90 })
-        .toBuffer()
+      try {
+        processedBuffer = await sharp(imageBuffer)
+          .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
+          .flatten({ background: { r: 255, g: 255, b: 255 } }) // fill transparency with white
+          .jpeg({ quality: 90 })
+          .toBuffer()
+      } catch (sharpErr) {
+        throw new AppError(ErrorCodes.CORRUPTED_FILE, `Image preprocessing failed: ${sharpErr.message}`)
+      }
     }
     ocrJobs.set(imageId, { ...ocrJobs.get(imageId), progress: 30 })
 
-    // Call Google Vision API
+    // Call Google Vision API with retry logic
     const client = createVisionClient()
-    const [result] = await client.documentTextDetection({
-      image: { content: processedBuffer.toString('base64') },
-      imageContext: { languageHints: ['en', 'es'] },
+    const [result] = await retryWithBackoff(
+      () =>
+        client.documentTextDetection({
+          image: { content: processedBuffer.toString('base64') },
+          imageContext: { languageHints: ['en', 'es'] },
+        }),
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        maxDelayMs: 15000,
+        shouldRetry: (err, attempt) => {
+          if (isQuotaExceededError(err)) {
+            console.warn(`[OCR] Job ${imageId} hit API quota on attempt ${attempt}; will retry`)
+            return true
+          }
+          if (isTimeoutError(err)) {
+            console.warn(`[OCR] Job ${imageId} network timeout on attempt ${attempt}; will retry`)
+            return true
+          }
+          // Don't retry on other errors (e.g. auth, bad request)
+          return false
+        },
+        onRetry: (err, attempt, delayMs) => {
+          console.warn(`[OCR] Job ${imageId} retry ${attempt}/3 after ${delayMs}ms — ${err.message}`)
+        },
+      },
+    ).catch((err) => {
+      if (isQuotaExceededError(err)) {
+        throw new AppError(ErrorCodes.API_QUOTA_EXCEEDED, err.message)
+      }
+      if (isTimeoutError(err)) {
+        throw new AppError(ErrorCodes.NETWORK_TIMEOUT, err.message)
+      }
+      throw new AppError(ErrorCodes.OCR_PROCESSING_FAILED, err.message)
     })
 
     ocrJobs.set(imageId, { ...ocrJobs.get(imageId), progress: 70 })
@@ -213,12 +269,14 @@ async function processImageWithOCR(imageId, imageBuffer, mimeType) {
 
     console.log(`[OCR] Job ${imageId} completed in ${processingTimeMs}ms`)
   } catch (error) {
-    console.error(`[OCR] Job ${imageId} failed:`, error)
+    const code = error instanceof AppError ? error.code : ErrorCodes.OCR_PROCESSING_FAILED
+    console.error(`[OCR] Job ${imageId} failed (${code}):`, error.message)
     ocrJobs.set(imageId, {
       ...ocrJobs.get(imageId),
       status: 'failed',
       completedAt: new Date().toISOString(),
       error: error.message,
+      errorCode: code,
     })
   }
 }
@@ -244,7 +302,7 @@ function uploadToCloudinary(buffer, mimeType) {
 // @route   POST /api/recipes/ocr
 // @desc    Upload a recipe image and trigger async OCR processing
 // @access  Private
-router.post('/', ocrRateLimiter, authenticateToken, upload.single('file'), async (req, res) => {
+router.post('/', ocrRateLimiter, authenticateToken, upload.single('file'), handleMulterError, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' })
@@ -255,7 +313,8 @@ router.post('/', ocrRateLimiter, authenticateToken, upload.single('file'), async
       cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.mimetype)
     } catch (uploadError) {
       console.error('[OCR] Cloudinary upload error:', uploadError)
-      return res.status(500).json({ error: 'Failed to upload file' })
+      const appErr = new AppError(ErrorCodes.UPLOAD_FAILED, uploadError.message)
+      return res.status(appErr.status).json(formatErrorResponse(appErr))
     }
 
     const imageId = crypto.randomUUID()
@@ -274,6 +333,7 @@ router.post('/', ocrRateLimiter, authenticateToken, upload.single('file'), async
       completedAt: null,
       results: null,
       error: null,
+      errorCode: null,
     })
 
     // Start OCR processing asynchronously (do not await)
@@ -343,7 +403,7 @@ router.get('/:imageId/results', authenticateToken, (req, res) => {
   }
 
   if (job.status === 'failed') {
-    return res.status(500).json({ error: 'OCR processing failed', details: job.error })
+    return res.status(500).json({ error: 'OCR processing failed', details: job.error, code: job.errorCode })
   }
 
   res.json({
